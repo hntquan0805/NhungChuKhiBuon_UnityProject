@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a42bdfbbc9bd212479dbbe4f5bd50b88, type: 3}
+  m_Name: Shield01
+  m_EditorClassIdentifier: Assembly-CSharp::CardData
+  cardName: Shield 01
+  type: 2
+  artwork: {fileID: -5928117700723452857, guid: 984cbafea67463946921afedfb336a24, type: 3}
+  effect: {fileID: 11400000, guid: 4d3d11c07f4c2ec4aa9978cd55893079, type: 2}
