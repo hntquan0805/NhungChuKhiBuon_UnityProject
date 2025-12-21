@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a42bdfbbc9bd212479dbbe4f5bd50b88, type: 3}
+  m_Name: Heal03
+  m_EditorClassIdentifier: Assembly-CSharp::CardData
+  cardName: Heal 03
+  type: 1
+  artwork: {fileID: -2746653078894775569, guid: de65fc9ceab5570499f948e42417f179, type: 3}
+  effect: {fileID: 11400000, guid: b90d630f2aeadb8429ad771ba5990f5e, type: 2}
