@@ -14,7 +14,7 @@ public class BettingUI : MonoBehaviour
 
     void Start()
     {
-        questionText.text = "Mức cược mong muốn lần này của quý khách là?";
+        questionText.text = "Hãy chọn mức cược!";
         UpdateCoinDisplay();
 
         // Gán sự kiện cho các nút
@@ -24,15 +24,15 @@ public class BettingUI : MonoBehaviour
         betAllButton.onClick.AddListener(() => SelectBet(MenuManager.Instance.PlayerCoins));
 
         // Đặt text cho các nút
-        bet1000Button.GetComponentInChildren<TextMeshProUGUI>().text = "1000 coin";
-        bet2000Button.GetComponentInChildren<TextMeshProUGUI>().text = "2000 coin";
-        bet5000Button.GetComponentInChildren<TextMeshProUGUI>().text = "5000 coin";
-        betAllButton.GetComponentInChildren<TextMeshProUGUI>().text = "Tất tay";
+        bet1000Button.GetComponentInChildren<TextMeshProUGUI>().text = "1000";
+        bet2000Button.GetComponentInChildren<TextMeshProUGUI>().text = "2000";
+        bet5000Button.GetComponentInChildren<TextMeshProUGUI>().text = "5000";
+        betAllButton.GetComponentInChildren<TextMeshProUGUI>().text = "Cược Hết";
     }
 
     void UpdateCoinDisplay()
     {
-        coinDisplayText.text = $"Số coin hiện có: {MenuManager.Instance.PlayerCoins}";
+        coinDisplayText.text = $"{MenuManager.Instance.PlayerCoins}";
     }
 
     void SelectBet(int amount)

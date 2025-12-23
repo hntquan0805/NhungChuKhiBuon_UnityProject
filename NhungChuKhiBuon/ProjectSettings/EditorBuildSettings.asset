@@ -11,6 +11,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/VictoryScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Scenes/Menu.unity
+    guid: a1c30de47f2a3cf4cbccf7c02b883c46
+  - enabled: 1
+    path: Assets/Scenes/BettingScene.unity
+    guid: fd71c3a7af120af479837f92f03cf70b
+  - enabled: 1
+    path: Assets/Scenes/Casino.unity
+    guid: 18b06548e4041344fb58c50343a15f84
+  - enabled: 1
+    path: Assets/Scenes/RestArea.unity
+    guid: b00718b0e73b6014cbce58870a4b39bc
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
