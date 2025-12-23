@@ -108,9 +108,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCharacter
   maxHP: 100
   animator: {fileID: 7536167094695924574}
-  attackDamage: 100
-  defense: 10
-  shieldAmount: 5
+  stats:
+    maxHP: 850
+    atk: 150
+    def: 100
+    crit: 15
+    critDam: 150
+  shieldAmount: 0
 --- !u!95 &7536167094695924574
 Animator:
   serializedVersion: 7

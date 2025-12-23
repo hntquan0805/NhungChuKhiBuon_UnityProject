@@ -39,7 +39,10 @@ public abstract class CharacterBase : MonoBehaviour
     protected virtual void PlayHurt()
     {
         if (animator != null)
+        {
+            Debug.Log($"{gameObject.name} plays Hurt animation.");
             animator.SetTrigger("Hurt");
+        }
     }
 
     protected virtual void PlayHeal()

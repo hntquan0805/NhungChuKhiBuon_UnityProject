@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement; // Thêm dòng này
+using UnityEngine.SceneManagement;
 
 public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance;
 
     [Header("Characters")]
-    public PlayerCharacter player;
+    public PlayerTeam playerTeam;
     public List<EnemyCharacter> enemies = new List<EnemyCharacter>();
 
     [Header("Turn Config")]
@@ -22,15 +22,15 @@ public class BattleManager : MonoBehaviour
     public HandController handController;
 
     [Header("Victory Settings")]
-    public string victorySceneName = "VictoryScene"; // Tên scene Victory
-    public float delayBeforeVictory = 1.5f; // Delay trước khi chuyển scene
+    public string victorySceneName = "VictoryScene";
+    public float delayBeforeVictory = 1.5f;
 
     public BattleContext context;
     public TurnState state;
 
     private bool waitingForSpaceBar = false;
     private List<EnemyCharacter> enemiesInterrupted = new List<EnemyCharacter>();
-    private bool isVictory = false; // Flag để tránh trigger nhiều lần
+    private bool isVictory = false;
 
     private void Awake()
     {
@@ -50,7 +50,6 @@ public class BattleManager : MonoBehaviour
             ResetTurn();
         }
 
-        // Kiểm tra victory condition
         CheckVictoryCondition();
     }
 
@@ -92,6 +91,12 @@ public class BattleManager : MonoBehaviour
 
     void ResetTurn()
     {
+        if (playerTeam == null)
+        {
+            Debug.LogError("PlayerTeam is null!");
+            return;
+        }
+
         List<EnemyCharacter> enemiesToInterrupt = new List<EnemyCharacter>();
         foreach (var enemy in enemies)
         {
@@ -103,7 +108,8 @@ public class BattleManager : MonoBehaviour
 
         foreach (var enemy in enemiesToInterrupt)
         {
-            enemy.SetTarget(player);
+            // Set target là cả PlayerTeam
+            enemy.SetTarget(playerTeam);
             enemy.PlayAttack();
             enemy.DealDamage();
             enemiesInterrupted.Add(enemy);
@@ -166,13 +172,10 @@ public class BattleManager : MonoBehaviour
         return null;
     }
 
-    // PHƯƠNG THỨC MỚI: Kiểm tra điều kiện chiến thắng
     void CheckVictoryCondition()
     {
-        // Tránh trigger nhiều lần
         if (isVictory) return;
 
-        // Kiểm tra có còn enemy nào còn sống không
         bool hasAliveEnemy = false;
         foreach (var enemy in enemies)
         {
@@ -183,7 +186,6 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        // Nếu không còn enemy nào → Victory!
         if (!hasAliveEnemy && enemies.Count == 0)
         {
             TriggerVictory();
@@ -197,7 +199,6 @@ public class BattleManager : MonoBehaviour
 
         Debug.Log("🎉 VICTORY! All enemies defeated!");
 
-        // Chuyển sang scene Victory sau delay
         Invoke("LoadVictoryScene", delayBeforeVictory);
     }
 
@@ -206,7 +207,6 @@ public class BattleManager : MonoBehaviour
         SceneManager.LoadScene(victorySceneName);
     }
 
-    // PUBLIC METHOD: Có thể gọi từ nơi khác nếu cần
     public bool IsVictory()
     {
         return isVictory;

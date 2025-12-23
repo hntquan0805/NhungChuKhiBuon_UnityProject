@@ -21,7 +21,6 @@ public class CardActionQueue : MonoBehaviour
         }
     }
 
-    // Thêm card action vào hàng đợi
     public void EnqueueCardAction(CardData cardData, PlayerCharacter owner, CardUI cardUI, EnemyCharacter targetEnemy = null)
     {
         CardAction action = new CardAction
@@ -29,7 +28,7 @@ public class CardActionQueue : MonoBehaviour
             cardData = cardData,
             owner = owner,
             cardUI = cardUI,
-            targetEnemy = targetEnemy // Lưu target nếu có
+            targetEnemy = targetEnemy
         };
 
         actionQueue.Enqueue(action);
@@ -60,7 +59,6 @@ public class CardActionQueue : MonoBehaviour
                     enemy.ReduceCP(1);
                     Debug.Log($"{enemy.gameObject.name} CP reduced to {enemy.GetCurrentCP()}");
 
-                    // Kiểm tra enemy nào có CP = 0 và chưa interrupt
                     if (enemy.GetCurrentCP() <= 0 && !BattleManager.Instance.HasEnemyInterrupted(enemy))
                     {
                         enemiesToInterrupt.Add(enemy);
@@ -69,7 +67,6 @@ public class CardActionQueue : MonoBehaviour
             }
 
             // Execute effect của card
-            // Nếu là attack card, target đã được chọn trước đó và lưu trong action
             action.cardData.effect.Execute(action.owner, action.targetEnemy);
 
             // Đợi animation
@@ -106,8 +103,14 @@ public class CardActionQueue : MonoBehaviour
     {
         BattleManager.Instance.state = TurnState.EnemyInterrupt;
 
-        // Set target và thực hiện attack
-        enemy.SetTarget(BattleManager.Instance.player);
+        // Set target là cả PlayerTeam
+        if (BattleManager.Instance.playerTeam == null)
+        {
+            Debug.LogError("PlayerTeam is null!");
+            yield break;
+        }
+
+        enemy.SetTarget(BattleManager.Instance.playerTeam);
         enemy.PlayAttack();
 
         // Đợi animation attack
@@ -161,5 +164,5 @@ public class CardAction
     public CardData cardData;
     public PlayerCharacter owner;
     public CardUI cardUI;
-    public EnemyCharacter targetEnemy; // Thêm field để lưu target đã chọn
+    public EnemyCharacter targetEnemy;
 }

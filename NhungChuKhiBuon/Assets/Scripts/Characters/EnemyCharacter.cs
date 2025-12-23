@@ -3,20 +3,24 @@ using UnityEngine;
 public class EnemyCharacter : CharacterBase
 {
     [Header("Enemy Stats")]
-    [SerializeField] private int attackDamage = 8;
+    public EnemyStats stats = new EnemyStats();
+
+    [Header("CP Settings")]
     [SerializeField] private int maxCP = 3;
 
     [Header("Death Settings")]
-    [SerializeField] private float destroyDelay = 1.5f; // Thời gian đợi trước khi destroy (để animation chạy)
-    [SerializeField] private bool fadeOutBeforeDestroy = false; // Có fade out không
+    [SerializeField] private float destroyDelay = 1.5f;
+    [SerializeField] private bool fadeOutBeforeDestroy = false;
     [SerializeField] private float fadeOutDuration = 0.5f;
 
     private int currentCP;
-    private PlayerCharacter targetPlayer;
+    private PlayerTeam targetTeam; // Đổi từ PlayerCharacter → PlayerTeam
     private bool isDead = false;
 
     protected override void Awake()
     {
+        // Sử dụng maxHP từ stats
+        maxHP = stats.maxHP;
         base.Awake();
         currentCP = maxCP;
     }
@@ -30,7 +34,7 @@ public class EnemyCharacter : CharacterBase
 
     public override void TakeDamage(int amount)
     {
-        if (isDead) return; // Không nhận damage nếu đã chết
+        if (isDead) return;
 
         currentHP -= amount;
         currentHP = Mathf.Max(currentHP, 0);
@@ -47,33 +51,28 @@ public class EnemyCharacter : CharacterBase
 
     private void Die()
     {
-        if (isDead) return; // Tránh gọi Die() nhiều lần
+        if (isDead) return;
 
         isDead = true;
 
         Debug.Log($"☠️ {gameObject.name} has been defeated!");
 
-        // Trigger animation chết
         PlayDeath();
 
-        // Xóa khỏi danh sách enemies trong BattleManager
         if (BattleManager.Instance != null)
         {
             BattleManager.Instance.enemies.Remove(this);
             Debug.Log($"Removed {gameObject.name} from enemy list. Remaining enemies: {BattleManager.Instance.enemies.Count}");
         }
 
-        // Nếu enemy này đang là target, clear target
         if (TargetSelector.Instance != null)
         {
             if (TargetSelector.Instance.GetCurrentSelectedEnemy() == this)
             {
                 Debug.Log($"{gameObject.name} was selected target, finding new target...");
-                // TargetSelector sẽ tự động tìm target mới trong GetCurrentSelectedEnemy()
             }
         }
 
-        // Destroy sau một khoảng delay để animation chạy
         if (fadeOutBeforeDestroy)
         {
             StartCoroutine(FadeOutAndDestroy());
@@ -86,10 +85,8 @@ public class EnemyCharacter : CharacterBase
 
     private System.Collections.IEnumerator FadeOutAndDestroy()
     {
-        // Đợi animation chết chạy một chút
         yield return new WaitForSeconds(destroyDelay - fadeOutDuration);
 
-        // Fade out
         SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>();
         float elapsed = 0f;
 
@@ -114,9 +111,10 @@ public class EnemyCharacter : CharacterBase
         Destroy(gameObject);
     }
 
-    public void SetTarget(PlayerCharacter player)
+    // Đổi thành set target = PlayerTeam
+    public void SetTarget(PlayerTeam team)
     {
-        targetPlayer = player;
+        targetTeam = team;
     }
 
     public void PlayAttack()
@@ -127,16 +125,32 @@ public class EnemyCharacter : CharacterBase
 
     public void DealDamage()
     {
-        if (targetPlayer == null) return;
+        if (targetTeam == null)
+        {
+            Debug.LogError("[ENEMY ATTACK] targetTeam is NULL!");
+            return;
+        }
 
-        PlayerTeam team = targetPlayer.GetComponentInParent<PlayerTeam>();
+        // Tính damage dựa trên stats
+        int baseDamage = Mathf.RoundToInt(stats.atk * stats.attackPercent / 100f);
 
-        int teamDefense = team.GetTotalDefense();
-        int actualDamage = attackDamage - Mathf.RoundToInt(attackDamage * teamDefense / 100f);
+        // Tính critical
+        EnemyDamageResult damageResult = CalculateDamage(baseDamage);
+
+        string critText = damageResult.isCritical ? " [CRITICAL HIT!]" : "";
+        Debug.Log($"[ENEMY ATTACK] {gameObject.name} attacking TEAM with {damageResult.finalDamage} damage{critText} (Base: {baseDamage}, {stats.attackPercent}% ATK)");
+
+        // Áp dụng defense của team
+        int teamDefense = targetTeam.GetTotalDefense();
+        int actualDamage = Mathf.RoundToInt(damageResult.finalDamage * (damageResult.finalDamage / (float)(damageResult.finalDamage + teamDefense)));
+        Debug.Log($"[ENEMY ATTACK] Calculated damage before defense: {actualDamage}");
         actualDamage = Mathf.Max(actualDamage, 0);
 
+        Debug.Log($"[ENEMY ATTACK] After team defense ({teamDefense}%): {actualDamage} damage");
+
+        // Xử lý shield
         int totalShield = 0;
-        foreach (var player in team.players)
+        foreach (var player in targetTeam.players)
         {
             totalShield += player.GetShieldAmount();
         }
@@ -148,7 +162,9 @@ public class EnemyCharacter : CharacterBase
             int shieldToAbsorb = Mathf.Min(totalShield, actualDamage);
             remainingDamage -= shieldToAbsorb;
 
-            foreach (var player in team.players)
+            Debug.Log($"[SHIELD] Absorbed {shieldToAbsorb} damage. Remaining: {remainingDamage}");
+
+            foreach (var player in targetTeam.players)
             {
                 int playerShield = player.GetShieldAmount();
                 if (playerShield > 0)
@@ -162,10 +178,11 @@ public class EnemyCharacter : CharacterBase
             }
         }
 
+        // Chia damage cho TẤT CẢ players còn sống
         if (remainingDamage > 0)
         {
             int playersAlive = 0;
-            foreach (var player in team.players)
+            foreach (var player in targetTeam.players)
             {
                 if (player.GetCurrentHP() > 0)
                     playersAlive++;
@@ -175,7 +192,9 @@ public class EnemyCharacter : CharacterBase
             {
                 int damagePerPlayer = Mathf.CeilToInt((float)remainingDamage / playersAlive);
 
-                foreach (var player in team.players)
+                Debug.Log($"[TEAM DAMAGE] Splitting {remainingDamage} damage among {playersAlive} players = {damagePerPlayer} each");
+
+                foreach (var player in targetTeam.players)
                 {
                     if (player.GetCurrentHP() > 0)
                     {
@@ -186,11 +205,34 @@ public class EnemyCharacter : CharacterBase
         }
         else
         {
-            foreach (var player in team.players)
+            // Chỉ play hurt animation nếu có shield block hết
+            foreach (var player in targetTeam.players)
             {
                 player.PlayHurt();
             }
         }
+    }
+
+    // Tính damage với crit (giống player)
+    public EnemyDamageResult CalculateDamage(int baseDamage)
+    {
+        EnemyDamageResult result = new EnemyDamageResult();
+
+        result.rawDamage = baseDamage;
+
+        // Check critical hit
+        result.isCritical = Random.Range(0, 100) < stats.crit;
+
+        if (result.isCritical)
+        {
+            result.finalDamage = Mathf.RoundToInt(result.rawDamage * stats.critDam / 100f);
+        }
+        else
+        {
+            result.finalDamage = result.rawDamage;
+        }
+
+        return result;
     }
 
     // CP Management
@@ -234,4 +276,34 @@ public class EnemyCharacter : CharacterBase
     {
         return isDead;
     }
+
+    // Getters cho stats
+    public int GetATK()
+    {
+        return stats.atk;
+    }
+
+    public int GetDefense()
+    {
+        return stats.def;
+    }
+
+    public int GetCrit()
+    {
+        return stats.crit;
+    }
+
+    public int GetCritDam()
+    {
+        return stats.critDam;
+    }
+}
+
+// Struct cho enemy damage result
+[System.Serializable]
+public struct EnemyDamageResult
+{
+    public int rawDamage;
+    public int finalDamage;
+    public bool isCritical;
 }

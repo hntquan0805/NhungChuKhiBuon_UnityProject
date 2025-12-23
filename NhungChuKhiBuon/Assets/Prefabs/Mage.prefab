@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8060128571886044205}
   - component: {fileID: 1485908990407653882}
-  - component: {fileID: 8331791492674836338}
   - component: {fileID: 799384656914584563}
   - component: {fileID: 2229938998958507822}
+  - component: {fileID: 6974194453106987665}
   m_Layer: 0
   m_Name: Mage
   m_TagString: Untagged
@@ -94,23 +94,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &8331791492674836338
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5670378252488612346}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e84e403c84dedc94eac37bbbdb45ba1c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerCharacter
-  maxHP: 100
-  animator: {fileID: 799384656914584563}
-  attackDamage: 100
-  defense: 10
-  shieldAmount: 5
 --- !u!95 &799384656914584563
 Animator:
   serializedVersion: 7
@@ -145,7 +128,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ac0796491aa3e647bd8bad298a34f7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDeck
-  owner: {fileID: 8331791492674836338}
+  owner: {fileID: 6974194453106987665}
   deckCards:
   - {fileID: 11400000, guid: b92a2bc71dd0a504b9e1ec8a8bfd56d3, type: 2}
   - {fileID: 11400000, guid: 696e47213e3e8aa47835074ca9e8a5d1, type: 2}
@@ -155,3 +138,25 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8f125adefcbc5fd47a747c0202b12bf3, type: 2}
   - {fileID: 11400000, guid: bb35b3a3c4489f64d873667f6b111c63, type: 2}
   - {fileID: 11400000, guid: 1b79c345756076149a1f3f9c382cd745, type: 2}
+--- !u!114 &6974194453106987665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5670378252488612346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e84e403c84dedc94eac37bbbdb45ba1c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCharacter
+  maxHP: 100
+  animator: {fileID: 799384656914584563}
+  stats:
+    maxHP: 800
+    atk: 125
+    def: 30
+    crit: 15
+    critDam: 150
+    characterClass: 0
+  shieldAmount: 0
