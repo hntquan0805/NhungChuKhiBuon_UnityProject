@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e39ace9453cb224b88b603bb6a38d81, type: 3}
   m_Name: Attack
   m_EditorClassIdentifier: Assembly-CSharp::AttackEffect
-  damage: 100
+  damagePercent: 90
+  fixedDamage: 0

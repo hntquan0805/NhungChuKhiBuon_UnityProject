@@ -3,11 +3,19 @@ using UnityEngine;
 public class PlayerCharacter : CharacterBase
 {
     [Header("Player Stats")]
-    [SerializeField] private int attackDamage = 10;
-    [SerializeField] private int defense = 10; // Defense riêng của player
-    [SerializeField] private int shieldAmount = 5;
+    public PlayerStats stats = new PlayerStats();
+
+    [Header("Runtime Stats")]
+    [SerializeField] private int shieldAmount = 0;
 
     private EnemyCharacter targetEnemy;
+
+    protected override void Awake()
+    {
+        // Sử dụng maxHP từ stats
+        maxHP = stats.maxHP;
+        base.Awake();
+    }
 
     public void SetTarget(EnemyCharacter enemy)
     {
@@ -27,12 +35,57 @@ public class PlayerCharacter : CharacterBase
         if (targetEnemy != null)
         {
             int hpBefore = targetEnemy.GetCurrentHP();
-            targetEnemy.TakeDamage(attackDamage);
+
+            // Lấy damage từ card effect (sẽ được set từ AttackEffect)
+            int baseDamage = GetComponent<TempDamageHolder>()?.damage ?? 0;
+
+            // Tính damage thực tế (bao gồm class advantage)
+            DamageResult result = CalculateDamage(baseDamage, targetEnemy);
+
+            targetEnemy.TakeDamage(result.finalDamage);
+
             int hpAfter = targetEnemy.GetCurrentHP();
             int actualDamage = hpBefore - hpAfter;
 
-            Debug.Log($"💥 {gameObject.name} dealt {actualDamage} damage to {targetEnemy.gameObject.name} (Base: {attackDamage})");
+            string critText = result.isCritical ? " [CRITICAL HIT!]" : "";
+            string classText = result.hasClassAdvantage ? " [CLASS ADVANTAGE!]" : "";
+            Debug.Log($"💥 {gameObject.name} dealt {actualDamage} damage to {targetEnemy.gameObject.name}{critText}{classText} (Base: {baseDamage}, Calculated: {result.finalDamage})");
+
+            // Clear temp damage
+            Destroy(GetComponent<TempDamageHolder>());
         }
+    }
+
+    // Tính toán damage dựa trên stats
+    public DamageResult CalculateDamage(int baseDamage, EnemyCharacter target)
+    {
+        DamageResult result = new DamageResult();
+
+        // Damage = ATK * multiplier từ card
+        result.rawDamage = baseDamage;
+
+        // Check critical hit
+        result.isCritical = Random.Range(0, 100) < stats.crit;
+
+        if (result.isCritical)
+        {
+            // Áp dụng critical damage
+            result.finalDamage = Mathf.RoundToInt(result.rawDamage * stats.critDam / 100f);
+        }
+        else
+        {
+            result.finalDamage = result.rawDamage;
+        }
+
+        // Áp dụng class advantage
+        if (target != null)
+        {
+            float classMultiplier = ClassAdvantage.GetDamageMultiplier(stats.characterClass, target.stats.characterClass);
+            result.finalDamage = Mathf.RoundToInt(result.finalDamage * classMultiplier);
+            result.hasClassAdvantage = classMultiplier > 1.0f;
+        }
+
+        return result;
     }
 
     // Triggered khi nhấn card Heal
@@ -61,7 +114,6 @@ public class PlayerCharacter : CharacterBase
         if (animator != null)
             animator.SetTrigger("Cast");
         Debug.Log("Cast skill: " + castName);
-        // Thêm logic skill sau này
     }
 
     public int GetShieldAmount()
@@ -77,12 +129,27 @@ public class PlayerCharacter : CharacterBase
 
     public int GetDefense()
     {
-        return defense;
+        return stats.def;
+    }
+
+    public int GetATK()
+    {
+        return stats.atk;
+    }
+
+    public int GetCrit()
+    {
+        return stats.crit;
+    }
+
+    public int GetCritDam()
+    {
+        return stats.critDam;
     }
 
     public override void Heal(int amount)
     {
-        base.Heal(amount); // Gọi base để update HP đúng cách
+        base.Heal(amount);
     }
 
     // Heal KHÔNG CÓ ANIMATION (dùng cho team buff)
@@ -102,4 +169,20 @@ public class PlayerCharacter : CharacterBase
     {
         return maxHP;
     }
+}
+
+// Struct để trả kết quả damage calculation
+[System.Serializable]
+public struct DamageResult
+{
+    public int rawDamage;
+    public int finalDamage;
+    public bool isCritical;
+    public bool hasClassAdvantage;
+}
+
+// Component tạm để lưu damage từ card effect
+public class TempDamageHolder : MonoBehaviour
+{
+    public int damage;
 }

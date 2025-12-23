@@ -1425,7 +1425,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c0cb6a7de25b184cb572b79a7874795, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleManager
-  player: {fileID: 2042817946}
+  playerTeam: {fileID: 1556840246}
   enemies:
   - {fileID: 1546283509}
   - {fileID: 740732037}
@@ -2216,7 +2216,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerTeam
   players:
-  - {fileID: 2042817946}
+  - {fileID: 0}
   - {fileID: 637965987281152299}
   - {fileID: 5128626185806110985}
 --- !u!1 &1678327656
@@ -2412,17 +2412,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2041216295}
   m_CullTransparentMesh: 1
---- !u!114 &2042817946 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8331791492674836338, guid: 6a37406dd21a0b04bb544b4e3591e758, type: 3}
-  m_PrefabInstance: {fileID: 3089898576675495033}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e84e403c84dedc94eac37bbbdb45ba1c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerCharacter
 --- !u!4 &2042817949 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8060128571886044205, guid: 6a37406dd21a0b04bb544b4e3591e758, type: 3}

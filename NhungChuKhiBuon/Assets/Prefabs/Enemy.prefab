@@ -257,6 +257,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
   fillImage: {fileID: 5511842433251202701}
   enemy: {fileID: 5365703542913948039}
+  destroyWithEnemy: 1
+  fadeOutBeforeDestroy: 1
+  fadeOutDuration: 0.5
 --- !u!1 &722325092100355864
 GameObject:
   m_ObjectHideFlags: 0
@@ -681,8 +684,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCharacter
   maxHP: 100
   animator: {fileID: 9096883051059494110}
-  attackDamage: 10
+  stats:
+    maxHP: 500
+    atk: 500
+    def: 30
+    crit: 10
+    critDam: 150
+    attackPercent: 100
+    characterClass: 1
   maxCP: 3
+  destroyDelay: 1.5
+  fadeOutBeforeDestroy: 1
+  fadeOutDuration: 0.5
 --- !u!61 &5976078671042613903
 BoxCollider2D:
   m_ObjectHideFlags: 0
