@@ -8,6 +8,8 @@ public class TooltipManager : MonoBehaviour
     public TMP_Text nameText;
     public TMP_Text mainStatText;
     public TMP_Text subStatText;
+    public TMP_Text tierText;
+    public TMP_Text priceText;
 
     RectTransform rectTransform;
     Canvas canvas;
@@ -80,6 +82,10 @@ public class TooltipManager : MonoBehaviour
     public void Show(ItemInstance item)
     {
         nameText.text = item.baseData.itemName;
+        nameText.color = GetTierColor(item.baseData.tier);
+        tierText.text = $"Tier: {item.baseData.tier}";
+        priceText.text = $"Price: {item.baseData.price}";
+
         mainStatText.text = $"{item.mainStat.statType} +{item.mainStat.value}";
 
         subStatText.text = "";
@@ -90,13 +96,25 @@ public class TooltipManager : MonoBehaviour
 
         gameObject.SetActive(true);
 
-        // Force rebuild để có size chính xác ngay lập tức
         Canvas.ForceUpdateCanvases();
         LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
     }
 
+
     public void Hide()
     {
         gameObject.SetActive(false);
+    }
+
+
+    Color GetTierColor(ItemTier tier)
+    {
+        return tier switch
+        {
+            ItemTier.Basic => Color.white,
+            ItemTier.Mid => Color.blue,
+            ItemTier.High => Color.yellow,
+            _ => Color.white
+        };
     }
 }
