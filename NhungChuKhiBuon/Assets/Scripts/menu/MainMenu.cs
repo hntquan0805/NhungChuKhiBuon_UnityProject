@@ -6,6 +6,8 @@ public class MainMenu : MonoBehaviour
     [Header("Menu Buttons")]
     public Button enterBattleButton;
     public Button enterArenaButton;
+    [Header("Các nút bấm")]
+    public Button playButton;
     public Button enterCasinoButton;
     public Button enterRestAreaButton;
 
@@ -20,6 +22,8 @@ public class MainMenu : MonoBehaviour
 
         if (enterArenaButton != null)
             enterArenaButton.onClick.AddListener(EnterArena);
+        if (playButton != null)
+            playButton.onClick.AddListener(EnterMap);
 
         if (enterCasinoButton != null)
             enterCasinoButton.onClick.AddListener(EnterCasino);
@@ -72,6 +76,11 @@ public class MainMenu : MonoBehaviour
         // Cảnh báo về Arena debuff
         Debug.Log("[Menu] ⚠ Entering Arena - Your team will lose 30% HP at start!");
         MenuManager.Instance.LoadScene(MenuManager.ARENA_SCENE);
+    }
+
+    void EnterMap()
+    {
+        MenuManager.Instance.LoadScene("Map");
     }
 
     void EnterCasino()
