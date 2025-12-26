@@ -22,6 +22,14 @@ public class PlayerCharacter : CharacterBase
         targetEnemy = enemy;
     }
 
+    // ===== NEW: SET HP DIRECTLY (for loading saved state) =====
+    public void SetHP(int current, int max)
+    {
+        maxHP = max;
+        currentHP = current;
+        currentHP = Mathf.Clamp(currentHP, 0, maxHP);
+    }
+
     // Triggered khi nhấn card Attack
     public void PlayAttack()
     {
@@ -125,6 +133,12 @@ public class PlayerCharacter : CharacterBase
     {
         shieldAmount -= amount;
         shieldAmount = Mathf.Max(shieldAmount, 0);
+    }
+
+    // ===== NEW: CLEAR SHIELD =====
+    public void ClearShield()
+    {
+        shieldAmount = 0;
     }
 
     public int GetDefense()
