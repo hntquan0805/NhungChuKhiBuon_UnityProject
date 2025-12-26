@@ -13,7 +13,7 @@ public class TeamSelectionManager : MonoBehaviour
     public Color disabledColor = new Color(1f, 1f, 1f, 0.3f);
 
     [Header("Scene Management")]
-    public string nextSceneName = "TestScene"; // Tên scene bạn muốn chuyển đến
+    public string nextSceneName = "Menu"; // Chuyển đến Menu thay vì TestScene
 
     [Header("Optional")]
     public Button startGameButton;
@@ -124,9 +124,9 @@ public class TeamSelectionManager : MonoBehaviour
     {
         if (selectedHeroes.Count == maxTeamSize)
         {
-            Debug.Log("╔══════════════════════════════════════╗");
+            Debug.Log("╔════════════════════════════════════╗");
             Debug.Log("║       BẮT ĐẦU CHUYỂN SCENE!         ║");
-            Debug.Log("╚══════════════════════════════════════╝");
+            Debug.Log("╚════════════════════════════════════╝");
             Debug.Log("");
             Debug.Log("✓ Team đã chọn gồm " + selectedHeroes.Count + " heroes:");
 
@@ -137,10 +137,13 @@ public class TeamSelectionManager : MonoBehaviour
 
             Debug.Log("");
             Debug.Log($"→ Đang chuyển sang scene: {nextSceneName}");
-            Debug.Log("════════════════════════════════════════");
+            Debug.Log("════════════════════════════════════");
 
             // Lưu team data vào TeamDataManager
             SaveTeamData();
+
+            // ===== NEW: Khởi tạo PersistentTeamManager =====
+            InitializePersistentTeam();
 
             // Chuyển scene
             SceneManager.LoadScene(nextSceneName);
@@ -162,6 +165,25 @@ public class TeamSelectionManager : MonoBehaviour
 
         // Lưu team
         TeamDataManager.Instance.SetSelectedTeam(selectedHeroes);
+    }
+
+    // ===== NEW: Initialize Persistent Team =====
+    private void InitializePersistentTeam()
+    {
+        // Tạo PersistentTeamManager nếu chưa có
+        if (PersistentTeamManager.Instance == null)
+        {
+            GameObject persistentManager = new GameObject("PersistentTeamManager");
+            persistentManager.AddComponent<PersistentTeamManager>();
+        }
+
+        // Clear old data nếu có
+        PersistentTeamManager.Instance.ClearTeamData();
+
+        // Initialize từ team selection
+        PersistentTeamManager.Instance.InitializeFromTeamSelection();
+
+        Debug.Log("✓ PersistentTeamManager initialized with full HP team");
     }
 
     public List<HeroAvatar> GetSelectedHeroes()

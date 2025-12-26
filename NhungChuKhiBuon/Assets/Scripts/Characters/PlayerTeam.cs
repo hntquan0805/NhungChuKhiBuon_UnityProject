@@ -3,24 +3,31 @@ using UnityEngine;
 
 public class PlayerTeam : MonoBehaviour
 {
+    [HideInInspector]
     public List<PlayerCharacter> players = new List<PlayerCharacter>();
+
     private int totalDefense = 0;
 
     private void Awake()
     {
-        // Lấy tất cả PlayerCharacter con một lần duy nhất
+        // KHÔNG collect ở đây nữa
         players.Clear();
-        foreach (Transform t in transform)
-        {
-            PlayerCharacter pc = t.GetComponent<PlayerCharacter>();
-            if (pc != null)
-            {
-                players.Add(pc);
-            }
-        }
+    }
 
-        // Tính tổng defense của team
+    // 🔥 TỰ ĐỘNG gọi khi spawn / destroy child
+    private void OnTransformChildrenChanged()
+    {
+        RefreshPlayers();
+    }
+
+    public void RefreshPlayers()
+    {
+        players.Clear();
+        players.AddRange(GetComponentsInChildren<PlayerCharacter>(true));
+
         CalculateTotalDefense();
+
+        Debug.Log($"[PlayerTeam] Refreshed players: {players.Count}");
     }
 
     private void CalculateTotalDefense()
@@ -28,7 +35,8 @@ public class PlayerTeam : MonoBehaviour
         totalDefense = 0;
         foreach (var player in players)
         {
-            totalDefense += player.GetDefense();
+            if (player != null)
+                totalDefense += player.GetDefense();
         }
     }
 
@@ -37,7 +45,8 @@ public class PlayerTeam : MonoBehaviour
         return totalDefense;
     }
 
-    // Lấy tổng HP team
+    // ===== Team HP helpers =====
+
     public int GetTotalCurrentHP()
     {
         int total = 0;

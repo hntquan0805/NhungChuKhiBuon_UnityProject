@@ -40,8 +40,20 @@ public class BattleManager : MonoBehaviour
     private void Start()
     {
         InitializeEnemiesCP();
+
         StartPlayerTurn();
+
+        // 🔥 DRAW HAND LẦN ĐẦU TIÊN
+        if (handController != null)
+        {
+            handController.DrawNewHand();
+        }
+        else
+        {
+            Debug.LogError("[BattleManager] HandController is NULL!");
+        }
     }
+
 
     private void Update()
     {
