@@ -3,13 +3,26 @@ using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
+    [Header("Các nút bấm")]
+    public Button playButton;
     public Button enterCasinoButton;
     public Button enterRestAreaButton;
 
     void Start()
     {
-        enterCasinoButton.onClick.AddListener(EnterCasino);
-        enterRestAreaButton.onClick.AddListener(EnterRestArea);
+        if (playButton != null)
+            playButton.onClick.AddListener(EnterMap);
+
+        if (enterCasinoButton != null)
+            enterCasinoButton.onClick.AddListener(EnterCasino);
+
+        if (enterRestAreaButton != null)
+            enterRestAreaButton.onClick.AddListener(EnterRestArea);
+    }
+
+    void EnterMap()
+    {
+        MenuManager.Instance.LoadScene("Map");
     }
 
     void EnterCasino()
