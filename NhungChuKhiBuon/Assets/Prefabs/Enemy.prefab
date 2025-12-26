@@ -686,7 +686,7 @@ MonoBehaviour:
   animator: {fileID: 9096883051059494110}
   stats:
     maxHP: 500
-    atk: 500
+    atk: 100
     def: 30
     crit: 10
     critDam: 150
