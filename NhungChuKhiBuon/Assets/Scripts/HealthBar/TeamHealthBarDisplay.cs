@@ -5,48 +5,43 @@ using TMPro;
 public class TeamHealthDisplay : MonoBehaviour
 {
     [Header("UI References")]
-    public Image fillImage; // Thanh máu
-    public TextMeshProUGUI healthText; // Text hiển thị số máu (optional)
+    public Image fillImage;
+    public TextMeshProUGUI healthText;
     public PlayerTeam team;
 
     [Header("Display Settings")]
-    public string healthFormat = "{0}/{1}"; // Format: CurrentHP/MaxHP
-    public bool showText = true; // Có hiển thị text hay không
-
-    private float maxHP;
-
-    private void Start()
-    {
-        if (team != null)
-        {
-            maxHP = team.GetTotalMaxHP();
-        }
-    }
+    public string healthFormat = "{0}/{1}";
+    public bool showText = true;
 
     private void Update()
     {
-        if (team != null)
-        {
-            UpdateHealthBar();
-        }
+        if (team == null)
+            return;
+
+        UpdateHealthBar();
     }
 
     private void UpdateHealthBar()
     {
+        int maxHP = team.GetTotalMaxHP();
         int currentHP = team.GetTotalCurrentHP();
-        
-        // Cập nhật thanh máu
+
+        // 🔥 CHỐNG CHIA 0 – team chưa sẵn sàng
+        if (maxHP <= 0)
+            return;
+
+        float ratio = Mathf.Clamp01((float)currentHP / maxHP);
+
         if (fillImage != null)
         {
             Vector3 s = fillImage.transform.localScale;
-            s.x = (float)currentHP / (float)maxHP;
+            s.x = ratio;
             fillImage.transform.localScale = s;
         }
 
-        // Cập nhật text (nếu có)
         if (showText && healthText != null)
         {
-            healthText.text = string.Format(healthFormat, currentHP, (int)maxHP);
+            healthText.text = string.Format(healthFormat, currentHP, maxHP);
         }
     }
 }
