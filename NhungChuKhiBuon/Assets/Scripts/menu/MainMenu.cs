@@ -86,9 +86,7 @@ public class MainMenu : MonoBehaviour
         MenuManager.Instance.LoadScene(MenuManager.REST_AREA_SCENE);
     }
 
-    /// <summary>
-    /// Update button interactable states based on team status
-    /// </summary>
+    // Cập nhật trạng thái các nút dựa vào team
     void UpdateButtonStates()
     {
         if (PersistentTeamManager.Instance == null)
@@ -120,17 +118,12 @@ public class MainMenu : MonoBehaviour
         if (PersistentTeamManager.Instance == null)
             return;
 
-        foreach (var hero in PersistentTeamManager.Instance.teamData)
-        {
-            hero.currentShield = 0;
-        }
+        PersistentTeamManager.Instance.ClearTeamShield();
 
         Debug.Log("[Menu] Team shields cleared");
     }
 
-    /// <summary>
-    /// Public method to refresh team display
-    /// </summary>
+    // Cập nhật hiển thị team
     public void RefreshTeamDisplay()
     {
         //if (teamHPDisplay != null)

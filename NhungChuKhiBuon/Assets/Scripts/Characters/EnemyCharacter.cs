@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections.Generic;
+using TMPro;
 
 public class EnemyCharacter : CharacterBase
 {
@@ -12,10 +14,33 @@ public class EnemyCharacter : CharacterBase
     [SerializeField] private float destroyDelay = 1.5f;
     [SerializeField] private bool fadeOutBeforeDestroy = false;
     [SerializeField] private float fadeOutDuration = 0.5f;
+    [SerializeField] private TextMeshProUGUI cpText;
+
+    [Header("Debuff UI")]
+    [SerializeField] private Transform debuffIconContainer;
+    [SerializeField] private GameObject debuffIconPrefab;
+
+    [Header("Buff UI")]
+    [SerializeField] private Transform buffIconContainer;
+    [SerializeField] private GameObject buffIconPrefab;
+
+    [Header("Passive Ability")]
+    [SerializeField] private Sprite increaseAttackIcon;
+    [SerializeField] private int passiveTurnInterval = 4;
+    [SerializeField] private int passiveBuffStacks = 2;
 
     private int currentCP;
     private PlayerTeam targetTeam; // Đổi từ PlayerCharacter → PlayerTeam
     private bool isDead = false;
+    private int turnCounter = 0;
+    
+    // Debuff system
+    private List<DebuffInstance> debuffs = new List<DebuffInstance>();
+    private List<GameObject> debuffIcons = new List<GameObject>();
+    
+    // Buff system
+    private List<BuffInstance> buffs = new List<BuffInstance>();
+    private List<GameObject> buffIcons = new List<GameObject>();
 
     protected override void Awake()
     {
@@ -25,11 +50,16 @@ public class EnemyCharacter : CharacterBase
         currentCP = maxCP;
     }
 
+    private void Start()
+    {
+        // Apply passive buff khi vào trận
+        ApplyPassiveBuff();
+    }
+
     public void InitializeCP(int min, int max)
     {
         maxCP = Random.Range(min, max + 1);
         currentCP = maxCP;
-        Debug.Log($"{gameObject.name} initialized with CP: {currentCP}/{maxCP}");
     }
 
     public override void TakeDamage(int amount)
@@ -38,8 +68,6 @@ public class EnemyCharacter : CharacterBase
 
         currentHP -= amount;
         currentHP = Mathf.Max(currentHP, 0);
-
-        Debug.Log($"[ENEMY DAMAGE] {gameObject.name} took {amount} damage. HP: {currentHP}/{maxHP}");
 
         PlayHurt();
 
@@ -55,21 +83,20 @@ public class EnemyCharacter : CharacterBase
 
         isDead = true;
 
-        Debug.Log($"☠️ {gameObject.name} has been defeated!");
+        // Xóa tất cả debuff icons trước khi chết
+        ClearDebuffIcons();
 
         PlayDeath();
 
         if (BattleManager.Instance != null)
         {
             BattleManager.Instance.enemies.Remove(this);
-            Debug.Log($"Removed {gameObject.name} from enemy list. Remaining enemies: {BattleManager.Instance.enemies.Count}");
         }
 
         if (TargetSelector.Instance != null)
         {
             if (TargetSelector.Instance.GetCurrentSelectedEnemy() == this)
             {
-                Debug.Log($"{gameObject.name} was selected target, finding new target...");
             }
         }
 
@@ -85,8 +112,7 @@ public class EnemyCharacter : CharacterBase
 
     private System.Collections.IEnumerator FadeOutAndDestroy()
     {
-        yield return new WaitForSeconds(destroyDelay - fadeOutDuration);
-
+        // Fade ngay lập tức, không đợi
         SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>();
         float elapsed = 0f;
 
@@ -95,6 +121,7 @@ public class EnemyCharacter : CharacterBase
             elapsed += Time.deltaTime;
             float alpha = 1f - (elapsed / fadeOutDuration);
 
+            // Fade sprites
             foreach (var sprite in sprites)
             {
                 if (sprite != null)
@@ -105,9 +132,19 @@ public class EnemyCharacter : CharacterBase
                 }
             }
 
+            // Fade CP Text nếu có
+            if (cpText != null)
+            {
+                Color textColor = cpText.color;
+                textColor.a = alpha;
+                cpText.color = textColor;
+            }
+
             yield return null;
         }
 
+        // Đợi thêm thời gian trước khi destroy
+        yield return new WaitForSeconds(destroyDelay - fadeOutDuration);
         Destroy(gameObject);
     }
 
@@ -127,7 +164,6 @@ public class EnemyCharacter : CharacterBase
     {
         if (targetTeam == null)
         {
-            Debug.LogError("[ENEMY ATTACK] targetTeam is NULL!");
             return;
         }
 
@@ -137,45 +173,21 @@ public class EnemyCharacter : CharacterBase
         // Tính critical
         EnemyDamageResult damageResult = CalculateDamage(baseDamage);
 
-        string critText = damageResult.isCritical ? " [CRITICAL HIT!]" : "";
-        Debug.Log($"[ENEMY ATTACK] {gameObject.name} attacking TEAM with {damageResult.finalDamage} damage{critText} (Base: {baseDamage}, {stats.attackPercent}% ATK)");
-
         // Áp dụng defense của team
         int teamDefense = targetTeam.GetTotalDefense();
         int actualDamage = Mathf.RoundToInt(damageResult.finalDamage * (damageResult.finalDamage / (float)(damageResult.finalDamage + teamDefense)));
-        Debug.Log($"[ENEMY ATTACK] Calculated damage before defense: {actualDamage}");
         actualDamage = Mathf.Max(actualDamage, 0);
 
-        Debug.Log($"[ENEMY ATTACK] After team defense ({teamDefense}%): {actualDamage} damage");
-
-        // Xử lý shield
-        int totalShield = 0;
-        foreach (var player in targetTeam.players)
-        {
-            totalShield += player.GetShieldAmount();
-        }
-
+        int teamShield = targetTeam.GetTeamShield();
         int remainingDamage = actualDamage;
 
-        if (totalShield > 0)
+        if (teamShield > 0)
         {
-            int shieldToAbsorb = Mathf.Min(totalShield, actualDamage);
+            int shieldToAbsorb = Mathf.Min(teamShield, actualDamage);
             remainingDamage -= shieldToAbsorb;
 
-            Debug.Log($"[SHIELD] Absorbed {shieldToAbsorb} damage. Remaining: {remainingDamage}");
-
-            foreach (var player in targetTeam.players)
-            {
-                int playerShield = player.GetShieldAmount();
-                if (playerShield > 0)
-                {
-                    float ratio = (float)playerShield / totalShield;
-                    int shieldLoss = Mathf.CeilToInt(shieldToAbsorb * ratio);
-                    shieldLoss = Mathf.Min(shieldLoss, playerShield);
-
-                    player.ReduceShield(shieldLoss);
-                }
-            }
+            // Giảm shield của team
+            targetTeam.ReduceShield(shieldToAbsorb);
         }
 
         // Chia damage cho TẤT CẢ players còn sống
@@ -192,8 +204,6 @@ public class EnemyCharacter : CharacterBase
             {
                 int damagePerPlayer = Mathf.CeilToInt((float)remainingDamage / playersAlive);
 
-                Debug.Log($"[TEAM DAMAGE] Splitting {remainingDamage} damage among {playersAlive} players = {damagePerPlayer} each");
-
                 foreach (var player in targetTeam.players)
                 {
                     if (player.GetCurrentHP() > 0)
@@ -205,10 +215,13 @@ public class EnemyCharacter : CharacterBase
         }
         else
         {
-            // Chỉ play hurt animation nếu có shield block hết
+            // Shield block hết damage -> chỉ play hurt animation
             foreach (var player in targetTeam.players)
             {
-                player.PlayHurt();
+                if (player.GetCurrentHP() > 0)
+                {
+                    player.PlayHurt();
+                }
             }
         }
     }
@@ -280,7 +293,29 @@ public class EnemyCharacter : CharacterBase
     // Getters cho stats
     public int GetATK()
     {
-        return stats.atk;
+        int baseATK = stats.atk;
+        
+        // Tính tổng tăng ATK từ buff
+        float totalBonus = 0f;
+        foreach (var buff in buffs)
+        {
+            totalBonus += buff.GetAttackBonus();
+        }
+        
+        // Tính tổng giảm ATK từ debuff
+        float totalReduction = 0f;
+        foreach (var debuff in debuffs)
+        {
+            totalReduction += debuff.GetAttackReduction();
+        }
+        
+        // Giới hạn giảm tối đa 80% (không giảm quá nhiều)
+        totalReduction = Mathf.Min(totalReduction, 0.8f);
+        
+        // Áp dụng cả buff và debuff
+        int finalATK = Mathf.RoundToInt(baseATK * (1f + totalBonus - totalReduction));
+        
+        return finalATK;
     }
 
     public int GetDefense()
@@ -296,6 +331,255 @@ public class EnemyCharacter : CharacterBase
     public int GetCritDam()
     {
         return stats.critDam;
+    }
+
+    // ========== DEBUFF SYSTEM ==========
+    
+    public void AddDebuff(DebuffType type, int stacks, PlayerCharacter source, Sprite icon = null)
+    {
+        // DecreaseAttack: Cộng stack nếu đã có
+        // Burn và các debuff khác: Tạo mới
+        if (type == DebuffType.DecreaseAttack)
+        {
+            DebuffInstance existingDebuff = debuffs.Find(d => d.type == type);
+            
+            if (existingDebuff != null)
+            {
+                // Đã có debuff này -> cộng thêm stack
+                existingDebuff.AddStacks(stacks);
+            }
+            else
+            {
+                // Chưa có -> tạo mới
+                DebuffInstance newDebuff = new DebuffInstance(type, stacks, source, icon);
+                debuffs.Add(newDebuff);
+            }
+        }
+        else
+        {
+            // Burn và các debuff khác: Luôn tạo mới
+            DebuffInstance newDebuff = new DebuffInstance(type, stacks, source, icon);
+            debuffs.Add(newDebuff);
+        }
+        
+        UpdateDebuffUI();
+    }
+    
+    public void RemoveDebuff(DebuffType type)
+    {
+        debuffs.RemoveAll(d => d.type == type);
+        UpdateDebuffUI();
+    }
+    
+    public void ProcessDebuffsAtTurnStart()
+    {
+        // Tăng turn counter và check passive ability
+        turnCounter++;
+        if (turnCounter >= passiveTurnInterval)
+        {
+            ApplyPassiveBuff();
+            turnCounter = 0;
+        }
+        
+        // Process buff duration
+        ProcessBuffs();
+        
+        int totalDamage = 0;
+        List<DebuffInstance> debuffsToRemove = new List<DebuffInstance>();
+        
+        foreach (var debuff in debuffs)
+        {
+            int damage = debuff.GetDamage();
+            if (damage > 0)
+            {
+                totalDamage += damage;
+            }
+            
+            // Giảm 1 stack cho TẤT CẢ debuff
+            debuff.ReduceStacks(1);
+            
+            // Nếu hết stack thì đánh dấu để xóa
+            if (debuff.stacks <= 0)
+            {
+                debuffsToRemove.Add(debuff);
+            }
+        }
+        
+        // Xóa các debuff đã hết stack
+        foreach (var debuff in debuffsToRemove)
+        {
+            debuffs.Remove(debuff);
+        }
+        
+        // Gây damage
+        if (totalDamage > 0)
+        {
+            TakeDamage(totalDamage);
+        }
+        
+        // Update UI sau khi xử lý debuff
+        UpdateDebuffUI();
+    }
+    
+    public List<DebuffInstance> GetDebuffs()
+    {
+        return debuffs;
+    }
+    
+    private void UpdateDebuffUI()
+    {
+        // Xóa tất cả icon cũ
+        ClearDebuffIcons();
+        
+        if (debuffIconContainer == null || debuffIconPrefab == null)
+        {
+            Debug.LogWarning($"[{gameObject.name}] DebuffIconContainer or Prefab is null!");
+            return;
+        }
+        
+        // Tạo icon mới cho mỗi debuff
+        foreach (var debuff in debuffs)
+        {
+            GameObject iconObj = Instantiate(debuffIconPrefab, debuffIconContainer);
+            
+            // Đảm bảo icon là con của container
+            iconObj.transform.SetParent(debuffIconContainer, false);
+            
+            // Reset scale và position local
+            RectTransform rectTransform = iconObj.GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                rectTransform.localScale = Vector3.one;
+                rectTransform.localPosition = Vector3.zero;
+            }
+            
+            DebuffIcon icon = iconObj.GetComponent<DebuffIcon>();
+            if (icon != null)
+            {
+                icon.Initialize(debuff);
+            }
+            
+            debuffIcons.Add(iconObj);
+        }
+    }
+    
+    private void ClearDebuffIcons()
+    {
+        foreach (var icon in debuffIcons)
+        {
+            if (icon != null)
+                Destroy(icon);
+        }
+        debuffIcons.Clear();
+    }
+    
+    // Buff system methods
+    private void ApplyPassiveBuff()
+    {
+        if (increaseAttackIcon == null)
+        {
+            Debug.LogWarning($"[{gameObject.name}] IncreaseAttackIcon not assigned!");
+            return;
+        }
+        
+        AddBuff(BuffType.IncreaseAttack, passiveBuffStacks, increaseAttackIcon);
+    }
+    
+    public void AddBuff(BuffType type, int stacks, Sprite icon)
+    {
+        BuffInstance existingBuff = buffs.Find(b => b.type == type);
+        
+        if (existingBuff != null)
+        {
+            existingBuff.AddStacks(stacks);
+        }
+        else
+        {
+            BuffInstance newBuff = new BuffInstance(type, stacks, icon);
+            buffs.Add(newBuff);
+        }
+        
+        UpdateBuffUI();
+    }
+    
+    public bool RemoveRandomBuff()
+    {
+        if (buffs.Count == 0)
+            return false;
+        
+        int randomIndex = Random.Range(0, buffs.Count);
+        buffs.RemoveAt(randomIndex);
+        
+        UpdateBuffUI();
+        return true;
+    }
+    
+    public List<BuffInstance> GetBuffs()
+    {
+        return buffs;
+    }
+    
+    private void ProcessBuffs()
+    {
+        List<BuffInstance> buffsToRemove = new List<BuffInstance>();
+        
+        foreach (var buff in buffs)
+        {
+            buff.ReduceStacks(1);
+            
+            if (buff.stacks <= 0)
+            {
+                buffsToRemove.Add(buff);
+            }
+        }
+        
+        foreach (var buff in buffsToRemove)
+        {
+            buffs.Remove(buff);
+        }
+        
+        // LUÔN update UI sau khi process buffs
+        if (buffs.Count > 0 || buffsToRemove.Count > 0)
+        {
+            UpdateBuffUI();
+        }
+    }
+    
+    private void UpdateBuffUI()
+    {
+        ClearBuffIcons();
+        
+        if (buffIconContainer == null || buffIconPrefab == null)
+            return;
+        
+        foreach (var buff in buffs)
+        {
+            GameObject iconObj = Instantiate(buffIconPrefab, buffIconContainer);
+            iconObj.transform.SetParent(buffIconContainer, false);
+            
+            RectTransform rectTransform = iconObj.GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                rectTransform.localScale = Vector3.one;
+                rectTransform.localPosition = Vector3.zero;
+            }
+            
+            BuffIcon icon = iconObj.GetComponent<BuffIcon>();
+            if (icon != null)
+                icon.Initialize(buff);
+            
+            buffIcons.Add(iconObj);
+        }
+    }
+    
+    private void ClearBuffIcons()
+    {
+        foreach (var icon in buffIcons)
+        {
+            if (icon != null)
+                Destroy(icon);
+        }
+        buffIcons.Clear();
     }
 }
 

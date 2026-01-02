@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14fb1908a3fcaf34bbae02705f339212, type: 3}
+  m_Name: Continuous Heal Effect
+  m_EditorClassIdentifier: Assembly-CSharp::ContinuousHealEffect
+  immediateHealPercent: 30
+  buffStacks: 3
+  healPerTurnPercent: 10
+  buffIcon: {fileID: -4674289991102016197, guid: 225caf8b34b357d41aa160b37388d84a, type: 3}

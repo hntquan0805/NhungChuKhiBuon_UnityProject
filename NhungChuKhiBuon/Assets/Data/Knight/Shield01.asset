@@ -16,3 +16,5 @@ MonoBehaviour:
   type: 2
   artwork: {fileID: -4132374829771648640, guid: 25696f277e50e374a9a1d5cddd4bd2aa, type: 3}
   effect: {fileID: 11400000, guid: 7dff742e07e20144a810a523d4156a46, type: 2}
+  description: "Gi\u01A1 khi\xEAn l\xEAn ch\u1EB7n \u0111\xF2n t\u1EA1o m\u1ED9t
+    l\u1EDBp l\xE1 ch\u1EAFn b\u1EB1ng 80% ATK."

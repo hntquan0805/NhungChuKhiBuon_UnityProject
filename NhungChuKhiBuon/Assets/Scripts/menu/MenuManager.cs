@@ -34,9 +34,7 @@ public class MenuManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Add coins to player
-    /// </summary>
+    // Thêm coins cho player
     public void AddCoins(int amount)
     {
         PlayerCoins += amount;
@@ -44,9 +42,7 @@ public class MenuManager : MonoBehaviour
         Debug.Log($"[MenuManager] +{amount} coins. Total: {PlayerCoins}");
     }
 
-    /// <summary>
-    /// Spend coins if player has enough
-    /// </summary>
+    // Chi tiêu coins nếu đủ
     public bool SpendCoins(int amount)
     {
         if (PlayerCoins >= amount)
@@ -61,9 +57,7 @@ public class MenuManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Load a scene by name
-    /// </summary>
+    // Load scene theo tên
     public void LoadScene(string sceneName)
     {
         Debug.Log($"[MenuManager] Loading scene: {sceneName}");
@@ -78,17 +72,13 @@ public class MenuManager : MonoBehaviour
         SceneManager.LoadScene(sceneName);
     }
 
-    /// <summary>
-    /// Return to main menu
-    /// </summary>
+    // Trở về main menu
     public void ReturnToMenu()
     {
         LoadScene(MENU_SCENE);
     }
 
-    /// <summary>
-    /// Check if scene exists in build settings
-    /// </summary>
+    // Check scene có trong build settings không
     private bool SceneExists(string sceneName)
     {
         for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
@@ -102,26 +92,20 @@ public class MenuManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Get current scene name
-    /// </summary>
+    // Lấy tên scene hiện tại
     public string GetCurrentSceneName()
     {
         return SceneManager.GetActiveScene().name;
     }
 
-    /// <summary>
-    /// Check if currently in battle scene
-    /// </summary>
+    // Check có đang ở battle scene không
     public bool IsInBattle()
     {
         string currentScene = GetCurrentSceneName();
         return currentScene == BATTLE_SCENE || currentScene == ARENA_SCENE;
     }
 
-    /// <summary>
-    /// Reset game data (for new game)
-    /// </summary>
+    // Reset game data
     public void ResetGameData()
     {
         PlayerCoins = 10000;
@@ -136,9 +120,7 @@ public class MenuManager : MonoBehaviour
         Debug.Log("[MenuManager] Game data reset");
     }
 
-    /// <summary>
-    /// Debug: Log current game state
-    /// </summary>
+    // Debug: Log game state
     public void LogGameState()
     {
         Debug.Log("=== GAME STATE ===");
