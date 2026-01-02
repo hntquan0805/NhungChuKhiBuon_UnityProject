@@ -8,13 +8,15 @@ public class PlayerTeam : MonoBehaviour
 
     private int totalDefense = 0;
 
+    [Header("Team Shield")]
+    private int teamShield = 0;
+
     private void Awake()
     {
-        // KHÔNG collect ở đây nữa
         players.Clear();
+        teamShield = 0; // Khởi tạo shield = 0
     }
 
-    // 🔥 TỰ ĐỘNG gọi khi spawn / destroy child
     private void OnTransformChildrenChanged()
     {
         RefreshPlayers();
@@ -45,7 +47,29 @@ public class PlayerTeam : MonoBehaviour
         return totalDefense;
     }
 
-    // ===== Team HP helpers =====
+    public int GetTeamShield()
+    {
+        return teamShield;
+    }
+
+    public void AddShield(int amount)
+    {
+        teamShield += amount;
+        Debug.Log($"[Team Shield] Added {amount}. Total shield: {teamShield}");
+    }
+
+    public void ReduceShield(int amount)
+    {
+        teamShield -= amount;
+        teamShield = Mathf.Max(teamShield, 0);
+        Debug.Log($"[Team Shield] Reduced by {amount}. Remaining: {teamShield}");
+    }
+
+    public void ClearShield()
+    {
+        teamShield = 0;
+        Debug.Log("[Team Shield] Cleared");
+    }
 
     public int GetTotalCurrentHP()
     {

@@ -15,4 +15,7 @@ MonoBehaviour:
   cardName: Heal 03
   type: 1
   artwork: {fileID: -2746653078894775569, guid: de65fc9ceab5570499f948e42417f179, type: 3}
-  effect: {fileID: 11400000, guid: b90d630f2aeadb8429ad771ba5990f5e, type: 2}
+  effect: {fileID: 11400000, guid: ee495655997704645ac17c08aed14fdc, type: 2}
+  description: "Qu\u1EB1n c\u01A1 th\u1EC3 tri li\u1EC7u cho to\xE0n b\u1ED9 \u0111\u1ED3ng
+    minh b\u1EB1ng 30% HP. Sau \u0111\xF3 buff Continuous Heal trong 3 l\u01B0\u1EE3t.\nContinuous
+    Heal: \u0110\u1EA7u l\u01B0\u1EE3t s\u1EBD h\u1ED3i m\xE1u b\u1EB1ng 10% HP "

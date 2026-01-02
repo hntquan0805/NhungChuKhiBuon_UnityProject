@@ -57,7 +57,6 @@ public class CardActionQueue : MonoBehaviour
                 if (enemy != null && enemy.HasCPRemaining())
                 {
                     enemy.ReduceCP(1);
-                    Debug.Log($"{enemy.gameObject.name} CP reduced to {enemy.GetCurrentCP()}");
 
                     if (enemy.GetCurrentCP() <= 0 && !BattleManager.Instance.HasEnemyInterrupted(enemy))
                     {

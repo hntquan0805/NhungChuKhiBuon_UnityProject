@@ -20,6 +20,9 @@ public class BattleManager : MonoBehaviour
 
     [Header("Hand Controller")]
     public HandController handController;
+    
+    [Header("UI")]
+    public FinishTurnButton finishTurnButton;
 
     [Header("Victory Settings")]
     public string victorySceneName = "VictoryScene";
@@ -43,7 +46,11 @@ public class BattleManager : MonoBehaviour
 
         StartPlayerTurn();
 
-        // 🔥 DRAW HAND LẦN ĐẦU TIÊN
+        if (playerTeam != null)
+        {
+            playerTeam.ClearShield();
+        }
+
         if (handController != null)
         {
             handController.DrawNewHand();
@@ -57,11 +64,6 @@ public class BattleManager : MonoBehaviour
 
     private void Update()
     {
-        if (waitingForSpaceBar && Input.GetKeyDown(KeyCode.Space))
-        {
-            ResetTurn();
-        }
-
         CheckVictoryCondition();
     }
 
@@ -101,12 +103,40 @@ public class BattleManager : MonoBehaviour
         return state == TurnState.PlayerTurn && context.playerAP > 0 && !waitingForSpaceBar;
     }
 
+    public void FinishTurn()
+    {
+        ResetTurn();
+    }
+
     void ResetTurn()
     {
         if (playerTeam == null)
         {
             Debug.LogError("PlayerTeam is null!");
             return;
+        }
+
+        playerTeam.ClearShield();
+
+        // ========== XỬ LÝ DEBUFF TRƯỚC KHI ENEMY ATTACK ==========
+        foreach (var enemy in enemies.ToList())
+        {
+            if (enemy != null && enemy.GetCurrentHP() > 0)
+            {
+                enemy.ProcessDebuffsAtTurnStart();
+            }
+        }
+
+        // ========== XỦ LÝ BUFF CỦA PLAYER TEAM ==========
+        if (playerTeam != null)
+        {
+            foreach (var player in playerTeam.players)
+            {
+                if (player != null && player.GetCurrentHP() > 0)
+                {
+                    player.ProcessBuffsAtTurnStart();
+                }
+            }
         }
 
         List<EnemyCharacter> enemiesToInterrupt = new List<EnemyCharacter>();
@@ -120,7 +150,6 @@ public class BattleManager : MonoBehaviour
 
         foreach (var enemy in enemiesToInterrupt)
         {
-            // Set target là cả PlayerTeam
             enemy.SetTarget(playerTeam);
             enemy.PlayAttack();
             enemy.DealDamage();
@@ -143,7 +172,14 @@ public class BattleManager : MonoBehaviour
         {
             handController.DrawNewHand();
         }
+        
+        // Reset button sprite khi bắt đầu turn mới
+        if (finishTurnButton != null)
+        {
+            finishTurnButton.ResetButton();
+        }
     }
+
 
     public bool IsWaitingForSpace()
     {
@@ -208,8 +244,6 @@ public class BattleManager : MonoBehaviour
     {
         isVictory = true;
         state = TurnState.BattleEnd;
-
-        Debug.Log("🎉 VICTORY! All enemies defeated!");
 
         Invoke("LoadVictoryScene", delayBeforeVictory);
     }

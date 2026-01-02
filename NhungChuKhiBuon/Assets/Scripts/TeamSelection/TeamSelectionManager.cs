@@ -66,7 +66,6 @@ public class TeamSelectionManager : MonoBehaviour
             }
             else
             {
-                Debug.Log("Team đã đủ " + maxTeamSize + " heroes!");
             }
         }
     }
@@ -78,8 +77,6 @@ public class TeamSelectionManager : MonoBehaviour
 
         int slotIndex = selectedHeroes.Count - 1;
         UpdateSlot(slotIndex, hero.fullBodySprite);
-
-        Debug.Log("Đã chọn: " + hero.heroName + " vào Slot " + (slotIndex + 1));
     }
 
     private void DeselectHero(HeroAvatar hero)
@@ -90,8 +87,6 @@ public class TeamSelectionManager : MonoBehaviour
         selectedHeroes.RemoveAt(index);
         hero.SetSelected(false, Color.white);
         RefreshSlots();
-
-        Debug.Log("Đã bỏ chọn: " + hero.heroName);
     }
 
     private void UpdateSlot(int slotIndex, Sprite heroSprite)
@@ -124,21 +119,6 @@ public class TeamSelectionManager : MonoBehaviour
     {
         if (selectedHeroes.Count == maxTeamSize)
         {
-            Debug.Log("╔════════════════════════════════════╗");
-            Debug.Log("║       BẮT ĐẦU CHUYỂN SCENE!         ║");
-            Debug.Log("╚════════════════════════════════════╝");
-            Debug.Log("");
-            Debug.Log("✓ Team đã chọn gồm " + selectedHeroes.Count + " heroes:");
-
-            for (int i = 0; i < selectedHeroes.Count; i++)
-            {
-                Debug.Log($"  [{i + 1}] {selectedHeroes[i].heroName}");
-            }
-
-            Debug.Log("");
-            Debug.Log($"→ Đang chuyển sang scene: {nextSceneName}");
-            Debug.Log("════════════════════════════════════");
-
             // Lưu team data vào TeamDataManager
             SaveTeamData();
 
@@ -182,8 +162,6 @@ public class TeamSelectionManager : MonoBehaviour
 
         // Initialize từ team selection
         PersistentTeamManager.Instance.InitializeFromTeamSelection();
-
-        Debug.Log("✓ PersistentTeamManager initialized with full HP team");
     }
 
     public List<HeroAvatar> GetSelectedHeroes()

@@ -40,7 +40,6 @@ public abstract class CharacterBase : MonoBehaviour
     {
         if (animator != null)
         {
-            Debug.Log($"{gameObject.name} plays Hurt animation.");
             animator.SetTrigger("Hurt");
         }
     }

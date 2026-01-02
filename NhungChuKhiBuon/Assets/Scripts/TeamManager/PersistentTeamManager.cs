@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-/// <summary>
-/// Quản lý trạng thái team xuyên suốt game - HP, stats, shields, v.v.
-/// Singleton với DontDestroyOnLoad
-/// </summary>
+// Quản lý trạng thái team xuyên suốt game (Singleton với DontDestroyOnLoad)
 public class PersistentTeamManager : MonoBehaviour
 {
     public static PersistentTeamManager Instance;
@@ -18,7 +15,6 @@ public class PersistentTeamManager : MonoBehaviour
         // Runtime stats
         public int currentHP;
         public int maxHP;
-        public int currentShield;
 
         // Original stats từ prefab (để restore nếu cần)
         public PlayerStats originalStats;
@@ -31,12 +27,14 @@ public class PersistentTeamManager : MonoBehaviour
             heroName = name;
             heroPrefab = prefab;
             isInitialized = false;
-            currentShield = 0;
         }
     }
 
     [Header("Runtime Team Data")]
     public List<HeroRuntimeData> teamData = new List<HeroRuntimeData>();
+
+    [Header("Team Shield")]
+    public int teamShield = 0; // 🔥 SHIELD CHUNG CỦA TEAM
 
     private void Awake()
     {
@@ -51,9 +49,7 @@ public class PersistentTeamManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Khởi tạo team data từ TeamDataManager (gọi sau khi chọn team)
-    /// </summary>
+    // Khởi tạo team data từ TeamDataManager
     public void InitializeFromTeamSelection()
     {
         if (TeamDataManager.Instance == null)
@@ -63,6 +59,7 @@ public class PersistentTeamManager : MonoBehaviour
         }
 
         teamData.Clear();
+        teamShield = 0; // Reset shield về 0 khi khởi tạo team mới
 
         var selectedTeam = TeamDataManager.Instance.GetSelectedTeam();
 
@@ -88,13 +85,9 @@ public class PersistentTeamManager : MonoBehaviour
 
             teamData.Add(runtimeData);
         }
-
-        Debug.Log($"[PersistentTeam] Initialized {teamData.Count} heroes with full HP");
     }
 
-    /// <summary>
-    /// Lưu trạng thái hiện tại của team từ battle scene
-    /// </summary>
+    // Lưu trạng thái team từ battle scene
     public void SaveTeamState(List<PlayerCharacter> players)
     {
         if (players == null || players.Count == 0)
@@ -103,6 +96,7 @@ public class PersistentTeamManager : MonoBehaviour
             return;
         }
 
+        // Lưu HP của từng player
         for (int i = 0; i < players.Count && i < teamData.Count; i++)
         {
             var player = players[i];
@@ -110,15 +104,18 @@ public class PersistentTeamManager : MonoBehaviour
 
             data.currentHP = player.GetCurrentHP();
             data.maxHP = player.GetMaxHP();
-            data.currentShield = player.GetShieldAmount();
 
-            Debug.Log($"[PersistentTeam] Saved {data.heroName}: HP={data.currentHP}/{data.maxHP}, Shield={data.currentShield}");
+        }
+
+        // 🔥 LƯU TEAM SHIELD
+        PlayerTeam team = players[0].GetComponentInParent<PlayerTeam>();
+        if (team != null)
+        {
+            teamShield = team.GetTeamShield();
         }
     }
 
-    /// <summary>
-    /// Áp dụng trạng thái đã lưu lên team trong battle scene
-    /// </summary>
+    // Áp dụng trạng thái đã lưu lên team
     public void ApplyTeamState(List<PlayerCharacter> players)
     {
         if (players == null || players.Count == 0)
@@ -127,6 +124,7 @@ public class PersistentTeamManager : MonoBehaviour
             return;
         }
 
+        // Apply HP cho từng player
         for (int i = 0; i < players.Count && i < teamData.Count; i++)
         {
             var player = players[i];
@@ -134,47 +132,44 @@ public class PersistentTeamManager : MonoBehaviour
 
             // Set HP trực tiếp (bypass animation)
             player.SetHP(data.currentHP, data.maxHP);
+        }
 
-            // Set shield nếu có
-            if (data.currentShield > 0)
+        // 🔥 APPLY TEAM SHIELD
+        PlayerTeam team = players[0].GetComponentInParent<PlayerTeam>();
+        if (team != null)
+        {
+            // Clear shield cũ trước
+            team.ClearShield();
+
+            // Set shield đã lưu
+            if (teamShield > 0)
             {
-                player.AddShieldSilent(data.currentShield);
+                team.AddShield(teamShield);
             }
-
-            Debug.Log($"[PersistentTeam] Applied state to {data.heroName}: HP={data.currentHP}/{data.maxHP}, Shield={data.currentShield}");
         }
     }
 
-    /// <summary>
-    /// Heal toàn bộ team về full HP (dùng cho Rest Area)
-    /// </summary>
+    // Heal toàn bộ team về full HP
     public void HealTeamToFull()
     {
         foreach (var data in teamData)
         {
             data.currentHP = data.maxHP;
-            data.currentShield = 0;
         }
 
-        Debug.Log("[PersistentTeam] Team healed to full HP");
+        teamShield = 0; // Clear shield khi heal full
     }
 
-    /// <summary>
-    /// Heal team một lượng cụ thể
-    /// </summary>
+    // Heal team một lượng cụ thể
     public void HealTeam(int amount)
     {
         foreach (var data in teamData)
         {
             data.currentHP = Mathf.Min(data.currentHP + amount, data.maxHP);
         }
-
-        Debug.Log($"[PersistentTeam] Team healed for {amount} HP");
     }
 
-    /// <summary>
-    /// Giảm HP toàn team (cho Arena debuff)
-    /// </summary>
+    // Giảm HP toàn team (cho Arena debuff)
     public void ReduceTeamHP(float percent)
     {
         foreach (var data in teamData)
@@ -184,12 +179,23 @@ public class PersistentTeamManager : MonoBehaviour
             data.currentHP -= damage;
         }
 
-        Debug.Log($"[PersistentTeam] Team HP reduced by {percent * 100}%");
     }
 
-    /// <summary>
-    /// Lấy tổng HP hiện tại của team
-    /// </summary>
+    // Thêm shield cho team
+    public void AddTeamShield(int amount)
+    {
+        teamShield += amount;
+        teamShield = Mathf.Max(teamShield, 0);
+    }
+
+    // Clear team shield
+    public void ClearTeamShield()
+    {
+        teamShield = 0;
+
+    }
+
+    // Lấy tổng HP hiện tại của team
     public int GetTotalCurrentHP()
     {
         int total = 0;
@@ -200,9 +206,7 @@ public class PersistentTeamManager : MonoBehaviour
         return total;
     }
 
-    /// <summary>
-    /// Lấy tổng max HP của team
-    /// </summary>
+    // Lấy tổng max HP của team
     public int GetTotalMaxHP()
     {
         int total = 0;
@@ -213,9 +217,13 @@ public class PersistentTeamManager : MonoBehaviour
         return total;
     }
 
-    /// <summary>
-    /// Check team có còn sống không
-    /// </summary>
+    // Lấy team shield hiện tại
+    public int GetTeamShield()
+    {
+        return teamShield;
+    }
+
+    // Check team có còn sống không
     public bool IsTeamAlive()
     {
         foreach (var data in teamData)
@@ -226,18 +234,14 @@ public class PersistentTeamManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Clear tất cả data (khi chọn team mới)
-    /// </summary>
+    // Clear tất cả data
     public void ClearTeamData()
     {
         teamData.Clear();
-        Debug.Log("[PersistentTeam] Team data cleared");
+        teamShield = 0;
     }
 
-    /// <summary>
-    /// Get hero data by index
-    /// </summary>
+    // Get hero data by index
     public HeroRuntimeData GetHeroData(int index)
     {
         if (index >= 0 && index < teamData.Count)
@@ -245,18 +249,9 @@ public class PersistentTeamManager : MonoBehaviour
         return null;
     }
 
-    /// <summary>
-    /// Log team status (debug)
-    /// </summary>
+    // Log team status (debug)
     public void LogTeamStatus()
     {
-        Debug.Log("=== TEAM STATUS ===");
-        for (int i = 0; i < teamData.Count; i++)
-        {
-            var data = teamData[i];
-            Debug.Log($"[{i}] {data.heroName}: {data.currentHP}/{data.maxHP} HP, Shield: {data.currentShield}");
-        }
-        Debug.Log($"Total: {GetTotalCurrentHP()}/{GetTotalMaxHP()} HP");
-        Debug.Log("==================");
+        // Debugging method - intentionally empty for production
     }
 }

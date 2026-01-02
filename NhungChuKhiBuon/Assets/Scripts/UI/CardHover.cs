@@ -1,62 +1,164 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using TMPro;
+using System.Collections;
 
 public class CardHoverEffect : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-    [Header("Scale Settings")]
-    public Vector3 normalScale = Vector3.one;
-    public Vector3 enlargedScale = Vector3.one * 1.5f;
-    public float scaleDuration = 0.2f;
-    public float holdTimeToEnlarge = 1f;
+    [Header("Hold Settings")]
+    public float holdTimeToShow = 0.3f;
+
+    [Header("Description Panel")]
+    public GameObject descriptionPanel;
+    public float descriptionDisplayTime = 3f;
+    public Vector3 descriptionOffset = new Vector3(0f, 200f, 0f);
 
     private bool isHolding = false;
     private float holdTimer = 0f;
-    private bool isEnlarged = false;
+    private bool isDescriptionShowing = false;
+    private CardUI cardUI;
+    private TextMeshProUGUI descriptionText;
+    private Coroutine hideDescriptionCoroutine;
+
+    private void Awake()
+    {
+        cardUI = GetComponent<CardUI>();
+
+        if (descriptionPanel != null)
+        {
+            descriptionPanel.SetActive(false);
+        }
+    }
+
+    private void Start()
+    {
+        if (descriptionPanel != null)
+        {
+            descriptionText = descriptionPanel.GetComponentInChildren<TextMeshProUGUI>();
+            descriptionPanel.SetActive(false);
+        }
+    }
 
     private void Update()
     {
         if (isHolding)
         {
             holdTimer += Time.deltaTime;
-            if (!isEnlarged && holdTimer >= holdTimeToEnlarge)
+
+            if (!isDescriptionShowing && holdTimer >= holdTimeToShow)
             {
-                StopAllCoroutines();
-                StartCoroutine(ScaleTo(enlargedScale));
-                isEnlarged = true;
+                ShowDescription();
             }
         }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (eventData.button != PointerEventData.InputButton.Left)
+            return;
+
         isHolding = true;
         holdTimer = 0f;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        if (eventData.button != PointerEventData.InputButton.Left)
+            return;
+
         isHolding = false;
         holdTimer = 0f;
-        if (isEnlarged)
+
+        if (isDescriptionShowing)
         {
-            StopAllCoroutines();
-            StartCoroutine(ScaleTo(normalScale));
-            isEnlarged = false;
+            HideDescription();
         }
     }
 
-    private System.Collections.IEnumerator ScaleTo(Vector3 target)
+    private void ShowDescription()
     {
-        Vector3 start = transform.localScale;
-        float t = 0f;
+        if (descriptionPanel == null || descriptionText == null || cardUI == null)
+            return;
 
-        while (t < 1f)
+        CardData cardData = cardUI.GetCardData();
+        if (cardData == null)
+            return;
+
+        descriptionText.text = cardData.description;
+
+        // Đặt vị trí panel
+        if (descriptionPanel.transform.parent == transform)
         {
-            t += Time.deltaTime / scaleDuration;
-            transform.localScale = Vector3.Lerp(start, target, t);
-            yield return null;
+            descriptionPanel.transform.localPosition = descriptionOffset;
+        }
+        else
+        {
+            RectTransform cardRect = GetComponent<RectTransform>();
+            RectTransform panelRect = descriptionPanel.GetComponent<RectTransform>();
+
+            if (cardRect != null && panelRect != null)
+            {
+                Vector2 cardPos = cardRect.anchoredPosition;
+                panelRect.anchoredPosition = cardPos + new Vector2(descriptionOffset.x, descriptionOffset.y);
+            }
         }
 
-        transform.localScale = target;
+        descriptionPanel.SetActive(true);
+        isDescriptionShowing = true;
+
+        if (hideDescriptionCoroutine != null)
+        {
+            StopCoroutine(hideDescriptionCoroutine);
+        }
+
+        hideDescriptionCoroutine = StartCoroutine(HideDescriptionAfterDelay());
+    }
+
+    private void HideDescription()
+    {
+        if (descriptionPanel != null)
+        {
+            descriptionPanel.SetActive(false);
+            isDescriptionShowing = false;
+        }
+
+        if (hideDescriptionCoroutine != null)
+        {
+            StopCoroutine(hideDescriptionCoroutine);
+            hideDescriptionCoroutine = null;
+        }
+    }
+
+    private IEnumerator HideDescriptionAfterDelay()
+    {
+        yield return new WaitForSeconds(descriptionDisplayTime);
+
+        if (descriptionPanel != null)
+        {
+            descriptionPanel.SetActive(false);
+            isDescriptionShowing = false;
+        }
+
+        hideDescriptionCoroutine = null;
+    }
+
+    private void OnDisable()
+    {
+        if (descriptionPanel != null)
+        {
+            descriptionPanel.SetActive(false);
+        }
+
+        isHolding = false;
+        isDescriptionShowing = false;
+        holdTimer = 0f;
+    }
+
+    private void OnDestroy()
+    {
+        if (descriptionPanel != null)
+        {
+            descriptionPanel.SetActive(false);
+        }
     }
 }

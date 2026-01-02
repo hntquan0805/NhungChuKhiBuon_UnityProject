@@ -16,3 +16,5 @@ MonoBehaviour:
   type: 1
   artwork: {fileID: -9129342452271278380, guid: bb7c399e173c9ab42b208aae395547d6, type: 3}
   effect: {fileID: 11400000, guid: b80f4ba30df7c9544bab7bd46c89ddaa, type: 2}
+  description: "Th\u1EAFp s\xE1ng quy\u1EC1n tr\u01B0\u1EE3ng h\u1ED3i m\xE1u cho
+    to\xE0n \u0111\u1ED9i b\u1EB1ng 50% gi\xE1 tr\u1ECB ATK + 40."

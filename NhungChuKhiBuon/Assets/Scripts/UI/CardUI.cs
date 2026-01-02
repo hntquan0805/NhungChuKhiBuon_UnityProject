@@ -32,19 +32,17 @@ public class CardUI : MonoBehaviour
         // Kiểm tra điều kiện play card
         if (!BattleManager.Instance.CanPlayCard())
         {
-            Debug.Log("Cannot play card - not player turn or out of AP");
             return;
         }
 
         // Kiểm tra đã được thêm vào queue chưa
         if (isQueued)
         {
-            Debug.Log("Card already queued");
             return;
         }
 
-        // Nếu là Attack card → Phải có target hợp lệ
-        if (cardData.type == CardType.Attack)
+        // Nếu là Attack hoặc Cast card → Phải có target hợp lệ
+        if (cardData.type == CardType.Attack || cardData.type == CardType.Cast)
         {
             EnemyCharacter targetEnemy = TargetSelector.Instance.GetCurrentSelectedEnemy();
 
@@ -64,12 +62,11 @@ public class CardUI : MonoBehaviour
                 TargetSelector.Instance.SelectEnemy(targetEnemy);
             }
 
-            Debug.Log($"Attack card targeting: {targetEnemy.gameObject.name}");
             EnqueueCard(targetEnemy);
         }
         else
         {
-            // Các card khác không cần target
+            // Các card khác không cần target (Heal, Shield)
             EnqueueCard(null);
         }
     }
