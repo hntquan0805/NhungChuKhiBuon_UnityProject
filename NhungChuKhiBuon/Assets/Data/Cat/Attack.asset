@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e39ace9453cb224b88b603bb6a38d81, type: 3}
+  m_Script: {fileID: 11500000, guid: abd417c317c59774280ffe86c4e6869d, type: 3}
   m_Name: Attack
   m_EditorClassIdentifier: Assembly-CSharp::AttackEffect
-  damagePercent: 120
-  fixedDamage: 0
+  damagePercent: 10
+  fixedDamage: 50

@@ -16,3 +16,5 @@ MonoBehaviour:
   type: 1
   artwork: {fileID: -2390025203631474131, guid: 322ba99f0e81917409b1ad09a0888777, type: 3}
   effect: {fileID: 11400000, guid: 678466ffcba8bcc4b8927cf341211a38, type: 2}
+  description: "C\u1EA7u nguy\u1EC7n \u0111\u1EC3 h\u1ED3i l\u1EA1i HP b\u1EB1ng
+    m\u1ED9t l\u01B0\u1EE3ng 50% ATK + 40."

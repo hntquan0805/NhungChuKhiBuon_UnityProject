@@ -15,4 +15,6 @@ MonoBehaviour:
   cardName: Heal 01
   type: 1
   artwork: {fileID: -2746653078894775569, guid: de65fc9ceab5570499f948e42417f179, type: 3}
-  effect: {fileID: 11400000, guid: 8b1142229d988024d9f26e7adb8d2288, type: 2}
+  effect: {fileID: 11400000, guid: b90d630f2aeadb8429ad771ba5990f5e, type: 2}
+  description: "Du\u1ED7i ng\u01B0\u1EDDi, tr\u1ECB li\u1EC7u cho to\xE0n \u0111\u1ED9i
+    m\u1ED9t l\u01B0\u1EE3ng b\u1EB1ng 50% HP + 60."

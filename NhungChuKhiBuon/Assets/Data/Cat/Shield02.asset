@@ -16,3 +16,5 @@ MonoBehaviour:
   type: 2
   artwork: {fileID: -5928117700723452857, guid: 984cbafea67463946921afedfb336a24, type: 3}
   effect: {fileID: 11400000, guid: 4d3d11c07f4c2ec4aa9978cd55893079, type: 2}
+  description: "Nhe nanh, t\u1EA1o m\u1ED9t l\u1EDBp khi\xEAn b\u1EB1ng 50% HP +
+    60 cho to\xE0n \u0111\u1ED9i."

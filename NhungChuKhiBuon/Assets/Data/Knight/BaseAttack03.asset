@@ -15,4 +15,7 @@ MonoBehaviour:
   cardName: Base Attack 03
   type: 0
   artwork: {fileID: 852723817484331653, guid: 2bbb2999af82d9141b5361e150a8ddb6, type: 3}
-  effect: {fileID: 11400000, guid: 2d8c8a8b9e43844409578ac5cf0274cf, type: 2}
+  effect: {fileID: 11400000, guid: 4e1fc5656b5f4ca4987899e643af604d, type: 2}
+  description: "Qu\u01A1 ki\u1EBFm, t\u1EA5n c\xF4ng b\u1EB1ng 75% gi\xE1 tr\u1ECB
+    ATK + 50 v\xE0 c\xF3 75% x\xF3a m\u1ED9t buff tr\xEAn ng\u01B0\u1EDDi m\u1EE5c
+    ti\xEAu."

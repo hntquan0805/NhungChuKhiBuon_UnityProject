@@ -15,4 +15,8 @@ MonoBehaviour:
   cardName: Cast 02
   type: 3
   artwork: {fileID: 1750942166776492265, guid: fd8388aa8ecccd04cb3ca4b1927596c8, type: 3}
-  effect: {fileID: 11400000, guid: 84f35ed09039392429c83b81e4e253fd, type: 2}
+  effect: {fileID: 11400000, guid: a438cdbd8dfd2354f984978b3d81fb01, type: 2}
+  description: "Gi\u01A1 g\u1EADy qu\u1EADt v\xE0o k\u1EBB \u0111\u1ECBch b\u1EB1ng
+    75% ATK v\xE0 thi\xEAu \u0111\u1ED1t (Burn) ch\xFAng trong 1 l\u01B0\u1EE3t.\nBurn:
+    \u0110\u1EA7u l\u01B0\u1EE3t nh\u1EADn s\xE1t th\u01B0\u01A1ng b\u1EB1ng 30%
+    ATK c\u1EE7a ch\u1EE7 s\u1EDF h\u1EEFu"
