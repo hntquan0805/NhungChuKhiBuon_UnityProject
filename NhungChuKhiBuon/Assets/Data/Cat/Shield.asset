@@ -9,7 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d37d65a4c786d648a7b922b2011d968, type: 3}
+  m_Script: {fileID: 11500000, guid: 9d1baac89cfd7d143acd233a57497550, type: 3}
   m_Name: Shield
   m_EditorClassIdentifier: Assembly-CSharp::ShieldEffect
-  shieldAmount: 8
+  shieldPercent: 50
+  fixedShield: 60

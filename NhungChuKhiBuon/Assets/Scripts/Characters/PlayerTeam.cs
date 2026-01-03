@@ -3,24 +3,33 @@ using UnityEngine;
 
 public class PlayerTeam : MonoBehaviour
 {
+    [HideInInspector]
     public List<PlayerCharacter> players = new List<PlayerCharacter>();
+
     private int totalDefense = 0;
+
+    [Header("Team Shield")]
+    private int teamShield = 0;
 
     private void Awake()
     {
-        // Lấy tất cả PlayerCharacter con một lần duy nhất
         players.Clear();
-        foreach (Transform t in transform)
-        {
-            PlayerCharacter pc = t.GetComponent<PlayerCharacter>();
-            if (pc != null)
-            {
-                players.Add(pc);
-            }
-        }
+        teamShield = 0; // Khởi tạo shield = 0
+    }
 
-        // Tính tổng defense của team
+    private void OnTransformChildrenChanged()
+    {
+        RefreshPlayers();
+    }
+
+    public void RefreshPlayers()
+    {
+        players.Clear();
+        players.AddRange(GetComponentsInChildren<PlayerCharacter>(true));
+
         CalculateTotalDefense();
+
+        Debug.Log($"[PlayerTeam] Refreshed players: {players.Count}");
     }
 
     private void CalculateTotalDefense()
@@ -28,7 +37,8 @@ public class PlayerTeam : MonoBehaviour
         totalDefense = 0;
         foreach (var player in players)
         {
-            totalDefense += player.GetDefense();
+            if (player != null)
+                totalDefense += player.GetDefense();
         }
     }
 
@@ -37,7 +47,30 @@ public class PlayerTeam : MonoBehaviour
         return totalDefense;
     }
 
-    // Lấy tổng HP team
+    public int GetTeamShield()
+    {
+        return teamShield;
+    }
+
+    public void AddShield(int amount)
+    {
+        teamShield += amount;
+        Debug.Log($"[Team Shield] Added {amount}. Total shield: {teamShield}");
+    }
+
+    public void ReduceShield(int amount)
+    {
+        teamShield -= amount;
+        teamShield = Mathf.Max(teamShield, 0);
+        Debug.Log($"[Team Shield] Reduced by {amount}. Remaining: {teamShield}");
+    }
+
+    public void ClearShield()
+    {
+        teamShield = 0;
+        Debug.Log("[Team Shield] Cleared");
+    }
+
     public int GetTotalCurrentHP()
     {
         int total = 0;

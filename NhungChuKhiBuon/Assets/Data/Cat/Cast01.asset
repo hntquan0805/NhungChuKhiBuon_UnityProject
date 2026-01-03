@@ -15,4 +15,6 @@ MonoBehaviour:
   cardName: Cast 01
   type: 3
   artwork: {fileID: 7426040560063703101, guid: b823d2317bb5b1746bff334067dbd756, type: 3}
-  effect: {fileID: 11400000, guid: 8b1142229d988024d9f26e7adb8d2288, type: 2}
+  effect: {fileID: 11400000, guid: ec40b5cf1e71e5a4abbd4eff7f364256, type: 2}
+  description: "N\u0103m \u01B0\u1EDDng ra, buff Defense cho to\xE0n \u0111\u1ED9i
+    trong 2 l\u01B0\u1EE3t.\nDefense: T\u0103ng 60% gi\xE1 tr\u1ECB defense"

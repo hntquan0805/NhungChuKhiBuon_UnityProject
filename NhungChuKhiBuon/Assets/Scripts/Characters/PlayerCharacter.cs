@@ -1,18 +1,18 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class PlayerCharacter : CharacterBase
 {
     [Header("Player Stats")]
     public PlayerStats stats = new PlayerStats();
 
-    [Header("Runtime Stats")]
-    [SerializeField] private int shieldAmount = 0;
-
     private EnemyCharacter targetEnemy;
+    
+    // Buff system
+    private List<BuffInstance> buffs = new List<BuffInstance>();
 
     protected override void Awake()
     {
-        // Sử dụng maxHP từ stats
         maxHP = stats.maxHP;
         base.Awake();
     }
@@ -22,54 +22,40 @@ public class PlayerCharacter : CharacterBase
         targetEnemy = enemy;
     }
 
-    // Triggered khi nhấn card Attack
+    public void SetHP(int current, int max)
+    {
+        maxHP = max;
+        currentHP = current;
+        currentHP = Mathf.Clamp(currentHP, 0, maxHP);
+    }
+
     public void PlayAttack()
     {
         if (animator != null)
             animator.SetTrigger("Attack");
     }
 
-    // Animation Event gọi khi đánh trúng
     public void DealDamage()
     {
         if (targetEnemy != null)
         {
-            int hpBefore = targetEnemy.GetCurrentHP();
-
-            // Lấy damage từ card effect (sẽ được set từ AttackEffect)
             int baseDamage = GetComponent<TempDamageHolder>()?.damage ?? 0;
-
-            // Tính damage thực tế (bao gồm class advantage)
             DamageResult result = CalculateDamage(baseDamage, targetEnemy);
 
             targetEnemy.TakeDamage(result.finalDamage);
 
-            int hpAfter = targetEnemy.GetCurrentHP();
-            int actualDamage = hpBefore - hpAfter;
-
-            string critText = result.isCritical ? " [CRITICAL HIT!]" : "";
-            string classText = result.hasClassAdvantage ? " [CLASS ADVANTAGE!]" : "";
-            Debug.Log($"💥 {gameObject.name} dealt {actualDamage} damage to {targetEnemy.gameObject.name}{critText}{classText} (Base: {baseDamage}, Calculated: {result.finalDamage})");
-
-            // Clear temp damage
             Destroy(GetComponent<TempDamageHolder>());
         }
     }
 
-    // Tính toán damage dựa trên stats
     public DamageResult CalculateDamage(int baseDamage, EnemyCharacter target)
     {
         DamageResult result = new DamageResult();
-
-        // Damage = ATK * multiplier từ card
         result.rawDamage = baseDamage;
-
-        // Check critical hit
         result.isCritical = Random.Range(0, 100) < stats.crit;
 
         if (result.isCritical)
         {
-            // Áp dụng critical damage
             result.finalDamage = Mathf.RoundToInt(result.rawDamage * stats.critDam / 100f);
         }
         else
@@ -77,7 +63,6 @@ public class PlayerCharacter : CharacterBase
             result.finalDamage = result.rawDamage;
         }
 
-        // Áp dụng class advantage
         if (target != null)
         {
             float classMultiplier = ClassAdvantage.GetDamageMultiplier(stats.characterClass, target.stats.characterClass);
@@ -88,53 +73,60 @@ public class PlayerCharacter : CharacterBase
         return result;
     }
 
-    // Triggered khi nhấn card Heal
     public void PlayHealCard(int amount)
     {
         Heal(amount);
     }
 
-    // Triggered khi nhấn card Shield - CÓ ANIMATION
     public void PlayShield(int amount)
     {
-        shieldAmount += amount;
         if (animator != null)
             animator.SetTrigger("Shield");
+
+        // Thêm shield vào team
+        PlayerTeam team = GetComponentInParent<PlayerTeam>();
+        if (team != null)
+        {
+            team.AddShield(amount);
+        }
     }
 
-    // Thêm shield KHÔNG CÓ ANIMATION (dùng cho team buff)
-    public void AddShieldSilent(int amount)
-    {
-        shieldAmount += amount;
-    }
-
-    // Triggered khi nhấn card Cast (ví dụ skill)
     public void PlayCast(string castName)
     {
         if (animator != null)
             animator.SetTrigger("Cast");
-        Debug.Log("Cast skill: " + castName);
-    }
-
-    public int GetShieldAmount()
-    {
-        return shieldAmount;
-    }
-
-    public void ReduceShield(int amount)
-    {
-        shieldAmount -= amount;
-        shieldAmount = Mathf.Max(shieldAmount, 0);
     }
 
     public int GetDefense()
     {
-        return stats.def;
+        int baseDEF = stats.def;
+        
+        // Tính tổng tăng DEF từ buff (phần trăm)
+        float totalBonus = 0f;
+        foreach (var buff in buffs)
+        {
+            totalBonus += buff.GetDefenseBonus();
+        }
+        
+        int boostedDEF = Mathf.RoundToInt(baseDEF * (1f + totalBonus));
+        
+        return boostedDEF;
     }
 
     public int GetATK()
     {
-        return stats.atk;
+        int baseATK = stats.atk;
+        
+        // Tính tổng tăng ATK từ buff
+        float totalBonus = 0f;
+        foreach (var buff in buffs)
+        {
+            totalBonus += buff.GetAttackBonus();
+        }
+        
+        int boostedATK = Mathf.RoundToInt(baseATK * (1f + totalBonus));
+        
+        return boostedATK;
     }
 
     public int GetCrit()
@@ -152,14 +144,12 @@ public class PlayerCharacter : CharacterBase
         base.Heal(amount);
     }
 
-    // Heal KHÔNG CÓ ANIMATION (dùng cho team buff)
     public void HealSilent(int amount)
     {
         currentHP += amount;
         currentHP = Mathf.Min(currentHP, maxHP);
     }
 
-    // Public method để trigger hurt animation
     public new void PlayHurt()
     {
         base.PlayHurt();
@@ -169,9 +159,113 @@ public class PlayerCharacter : CharacterBase
     {
         return maxHP;
     }
+
+    // ========== BUFF SYSTEM ==========
+    
+    public void AddBuff(BuffType type, int stacks, Sprite icon = null, int casterMaxHP = 0, float healPercent = 10f)
+    {
+        // Luôn cộng stack nếu đã có buff cùng loại
+        BuffInstance existingBuff = buffs.Find(b => b.type == type);
+        
+        if (existingBuff != null)
+        {
+            existingBuff.AddStacks(stacks);
+        }
+        else
+        {
+            BuffInstance newBuff = new BuffInstance(type, stacks, icon, casterMaxHP, healPercent);
+            buffs.Add(newBuff);
+        }
+        
+        // Update team buff UI
+        UpdateTeamBuffUI();
+    }
+    
+    public void RemoveBuff(BuffType type)
+    {
+        buffs.RemoveAll(b => b.type == type);
+        UpdateTeamBuffUI();
+    }
+    
+    public void ProcessBuffsAtTurnStart()
+    {
+        List<BuffInstance> buffsToRemove = new List<BuffInstance>();
+        
+        foreach (var buff in buffs)
+        {
+            // 1. Áp dụng effect trước khi giảm stack
+            if (buff.type == BuffType.ContinuousHeal)
+            {
+                // Heal toàn đội 10% HP của caster
+                int healAmount = buff.GetHealAmount();
+                HealWholeTeam(healAmount);
+            }
+            
+            // 2. Giảm 1 stack
+            buff.ReduceStacks(1);
+            
+            // 3. Nếu hết stack thì đánh dấu để xóa
+            if (buff.stacks <= 0)
+            {
+                buffsToRemove.Add(buff);
+            }
+        }
+        
+        // Xóa các buff đã hết stack
+        foreach (var buff in buffsToRemove)
+        {
+            buffs.Remove(buff);
+        }
+        
+        // LUÔN update UI sau khi process buffs
+        if (buffs.Count > 0 || buffsToRemove.Count > 0)
+        {
+            UpdateTeamBuffUI();
+        }
+    }
+    
+    private void HealWholeTeam(int amount)
+    {
+        // Tìm PlayerTeam trong scene và heal toàn đội
+        PlayerTeam team = FindObjectOfType<PlayerTeam>();
+        if (team != null)
+        {
+            foreach (var player in team.players)
+            {
+                if (player != null && player.GetCurrentHP() > 0)
+                {
+                    player.Heal(amount);
+                }
+            }
+        }
+    }
+    
+    public List<BuffInstance> GetBuffs()
+    {
+        return buffs;
+    }
+    
+    private void UpdateTeamBuffUI()
+    {
+        // Gọi team buff manager để update UI
+        PlayerTeam team = GetComponentInParent<PlayerTeam>();
+        if (team != null)
+        {
+            TeamBuffManager buffManager = team.GetComponent<TeamBuffManager>();
+            if (buffManager != null)
+            {
+                buffManager.UpdateBuffUI();
+            }
+        }
+    }
+    
+    public void ClearBuffs()
+    {
+        buffs.Clear();
+        UpdateTeamBuffUI();
+    }
 }
 
-// Struct để trả kết quả damage calculation
 [System.Serializable]
 public struct DamageResult
 {
@@ -181,7 +275,6 @@ public struct DamageResult
     public bool hasClassAdvantage;
 }
 
-// Component tạm để lưu damage từ card effect
 public class TempDamageHolder : MonoBehaviour
 {
     public int damage;

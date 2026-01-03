@@ -15,4 +15,7 @@ MonoBehaviour:
   cardName: Cast 02
   type: 3
   artwork: {fileID: -3716988799476323994, guid: 317895dea5df8c644bcf71adba83520a, type: 3}
-  effect: {fileID: 11400000, guid: 8b2752a6740ec344bbc38ac565955cc4, type: 2}
+  effect: {fileID: 11400000, guid: 8eeb12b6d9339414e9695c652e524a6d, type: 2}
+  description: "Gi\u01A1 khi\xEAn l\xEAn l\xE0m ch\xF3i l\xF2a k\u1EBB \u0111\u1ECBch
+    khi\u1EBFn ch\xFAng b\u1ECB Decrease Attack trong 2 l\u01B0\u1EE3t.\nDecrease
+    Attack: Tr\u1EEB 50% gi\xE1 tr\u1ECB Attack"

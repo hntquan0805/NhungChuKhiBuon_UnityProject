@@ -9,4 +9,8 @@ public class CardData : ScriptableObject
     public CardType type;
     public Sprite artwork;
     public CardEffect effect;
+
+    [Header("Description")]
+    [TextArea(5, 15)]
+    public string description;
 }

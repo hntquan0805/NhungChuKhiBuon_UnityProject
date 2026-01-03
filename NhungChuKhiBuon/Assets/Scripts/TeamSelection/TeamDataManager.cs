@@ -47,8 +47,6 @@ public class TeamDataManager : MonoBehaviour
 
             selectedTeam.Add(data);
         }
-
-        Debug.Log($"Saved {selectedTeam.Count} heroes to TeamDataManager");
     }
 
     // Lấy team đã lưu

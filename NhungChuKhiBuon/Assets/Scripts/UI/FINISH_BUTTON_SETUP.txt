@@ -1,0 +1,82 @@
+# HƯỚNG DẪN SETUP NÚT FINISH TURN
+
+## 1. TẠO BUTTON UI
+
+### Trong Unity Hierarchy:
+1. Right-click trong Canvas → UI → Button - TextMeshPro
+2. Đổi tên thành "FinishTurnButton"
+3. Xóa Text child object (không cần text)
+
+### Trong Inspector của FinishTurnButton:
+1. Thêm component **FinishTurnButton** script
+2. **Button References:**
+   - Finish Button: Kéo chính object này vào (auto-assigned nếu để trống)
+   - Button Image: Kéo Image component vào (auto-assigned nếu để trống)
+
+3. **Button Sprites:**
+   - Normal Sprite: Kéo hình nút bình thường vào
+   - Clicked Sprite: Kéo hình nút sau khi nhấn vào
+
+4. **AP Warning:**
+   - AP Text Transform: Kéo **RectTransform của AP Text** vào (object hiển thị "AP: X/Y")
+   - Shake Strength: 20 (độ mạnh rung)
+   - Shake Duration: 0.5 (thời gian animation)
+   - Scale Amount: 1.3 (phóng to 1.3 lần)
+
+## 2. KẾT NỐI VỚI BATTLE MANAGER
+
+1. Chọn BattleManager object trong scene
+2. Trong Inspector → BattleManager component
+3. Tìm section **UI**
+4. Kéo FinishTurnButton object vào field **Finish Turn Button**
+
+## 3. TÌM AP TEXT TRANSFORM
+
+### Cách 1 - Nếu đã có APDisplay:
+- Tìm object có component APDisplay
+- Kéo **RectTransform** của object đó vào field AP Text Transform
+
+### Cách 2 - Nếu AP text là TextMeshPro riêng:
+- Tìm object TextMeshPro hiển thị "AP: X/Y"
+- Kéo **RectTransform** của nó vào field AP Text Transform
+
+## 4. KIỂM TRA
+
+### Chạy game và test:
+- ✓ Nhấn nút Finish → Kết thúc lượt
+- ✓ Nếu còn AP → Text AP phóng to + rung
+- ✓ Sau khi nhấn → Sprite đổi sang Clicked
+- ✓ Lượt mới bắt đầu → Sprite về Normal
+
+## LƯU Ý
+
+1. **DOTween Required:**
+   - Script sử dụng DOTween cho animation
+   - Nếu chưa cài: Window → Package Manager → tìm "DOTween" → Import
+   - Hoặc: Assets → Import Package → DOTween
+
+2. **Sprites:**
+   - Sprite Mode = Single
+   - Texture Type = Sprite (2D and UI)
+   - Đảm bảo 2 sprites có cùng size để không bị nhảy hình
+
+3. **Animation chỉ chạy nếu:**
+   - AP Text Transform được assign
+   - Player còn AP khi nhấn nút
+
+## TROUBLESHOOTING
+
+**Nút không nhấn được:**
+- Kiểm tra Button component có Interactable = true
+- Kiểm tra có Canvas Raycaster trên Canvas
+
+**Animation không chạy:**
+- Kiểm tra đã import DOTween chưa
+- Kiểm tra AP Text Transform đã assign chưa
+
+**Sprite không đổi:**
+- Kiểm tra đã assign cả Normal và Clicked sprites
+- Kiểm tra Button Image đã assign
+
+**Console error "DOTween not found":**
+- Import DOTween từ Package Manager hoặc Asset Store
