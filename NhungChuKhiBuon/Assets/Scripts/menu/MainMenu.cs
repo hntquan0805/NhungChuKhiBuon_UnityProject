@@ -10,6 +10,7 @@ public class MainMenu : MonoBehaviour
     public Button playButton;
     public Button enterCasinoButton;
     public Button enterRestAreaButton;
+    public Button hospital;
 
     //[Header("Optional - Team HP Display")]
     //public TeamHPDisplay teamHPDisplay;
@@ -30,6 +31,9 @@ public class MainMenu : MonoBehaviour
 
         if (enterRestAreaButton != null)
             enterRestAreaButton.onClick.AddListener(EnterRestArea);
+
+        if (hospital != null)
+            hospital.onClick.AddListener(EnterHospital);
 
         // Update team HP display
         //if (teamHPDisplay != null)
@@ -64,6 +68,14 @@ public class MainMenu : MonoBehaviour
         Debug.Log("[Menu] Entering Battle...");
         MenuManager.Instance.LoadScene(MenuManager.BATTLE_SCENE);
     }
+
+
+    void EnterHospital()
+    {
+        Debug.Log("[Menu] Entering Hospital...");
+        MenuManager.Instance.LoadScene(MenuManager.HOSPITAL_SCENE);
+    }
+
 
     void EnterArena()
     {

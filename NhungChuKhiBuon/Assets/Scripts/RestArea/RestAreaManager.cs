@@ -7,124 +7,93 @@ public class RestAreaManager : MonoBehaviour
     public ShopManager shopManager;
     public TMP_Text coinText;
 
-    [Header("Healing Options")]
-    public int fullHealCost = 100;
-    public int partialHealAmount = 50;
-    public int partialHealCost = 30;
+    [Header("Team Display")]
+    public RestAreaTeamDisplay teamDisplay;
 
-    [Header("UI Buttons (Optional)")]
-    public UnityEngine.UI.Button fullHealButton;
-    public UnityEngine.UI.Button partialHealButton;
+    [Header("Heal Settings")]
+    public int healAmount = 100;
+    public int healCost = 10;
 
-    void Start()
+    [Header("UI Button")]
+    public UnityEngine.UI.Button healButton;
+
+    private void Start()
     {
         UpdateCoinUI();
 
-        // Setup heal buttons nếu có
-        if (fullHealButton != null)
+        if (healButton != null)
         {
-            fullHealButton.onClick.AddListener(FullHealTeam);
+            healButton.onClick.AddListener(HealLowestHero);
         }
 
-        if (partialHealButton != null)
-        {
-            partialHealButton.onClick.AddListener(PartialHealTeam);
-        }
-
-        // Log team status khi vào Rest Area
         if (PersistentTeamManager.Instance != null)
         {
             PersistentTeamManager.Instance.LogTeamStatus();
         }
     }
 
-    public void UpdateCoinUI()
+    // ===== HEAL HERO CÓ HP THẤP NHẤT =====
+    public void HealLowestHero()
     {
-        if (coinText != null && MenuManager.Instance != null)
-        {
-            coinText.text = MenuManager.Instance.PlayerCoins.ToString();
-        }
-    }
-
-    // ===== NEW: HEAL TEAM TO FULL =====
-    public void FullHealTeam()
-    {
-        if (PersistentTeamManager.Instance == null)
+        var team = PersistentTeamManager.Instance;
+        if (team == null)
         {
             Debug.LogError("[RestArea] PersistentTeamManager not found!");
             return;
         }
 
-        // Kiểm tra team đã full HP chưa
-        if (PersistentTeamManager.Instance.GetTotalCurrentHP() >= PersistentTeamManager.Instance.GetTotalMaxHP())
+        // Tìm hero có HP thấp nhất nhưng chưa full
+        PersistentTeamManager.HeroRuntimeData lowestHero = null;
+
+        foreach (var hero in team.teamData)
         {
-            Debug.Log("[RestArea] Team already at full HP!");
+            if (hero.currentHP > 0 && hero.currentHP < hero.maxHP)
+            {
+                if (lowestHero == null || hero.currentHP < lowestHero.currentHP)
+                {
+                    lowestHero = hero;
+                }
+            }
+        }
+
+        if (lowestHero == null)
+        {
+            Debug.Log("[RestArea] All heroes are already at full HP!");
             return;
         }
 
-        // Kiểm tra coins
+        // Check coins
         if (MenuManager.Instance != null)
         {
-            if (MenuManager.Instance.SpendCoins(fullHealCost))
+            if (!MenuManager.Instance.SpendCoins(healCost))
             {
-                PersistentTeamManager.Instance.HealTeamToFull();
-                Debug.Log($"[RestArea] Team fully healed! (-{fullHealCost} coins)");
+                Debug.LogWarning("[RestArea] Not enough coins!");
+                return;
+            }
+        }
 
-                UpdateCoinUI();
-                PersistentTeamManager.Instance.LogTeamStatus();
-            }
-            else
-            {
-                Debug.LogWarning("[RestArea] Not enough coins for full heal!");
-            }
-        }
-        else
-        {
-            // Không có MenuManager thì heal free
-            PersistentTeamManager.Instance.HealTeamToFull();
-            Debug.Log("[RestArea] Team fully healed (FREE)!");
-            PersistentTeamManager.Instance.LogTeamStatus();
-        }
+        // Heal hero
+        int beforeHP = lowestHero.currentHP;
+        lowestHero.currentHP = Mathf.Min(
+            lowestHero.currentHP + healAmount,
+            lowestHero.maxHP
+        );
+
+        Debug.Log(
+            $"[RestArea] Healed {lowestHero.heroName}: " +
+            $"{beforeHP} → {lowestHero.currentHP} (-{healCost} coins)"
+        );
+
+        UpdateCoinUI();
+        RefreshTeamDisplay();
+        team.LogTeamStatus();
     }
 
-    // ===== NEW: PARTIAL HEAL =====
-    public void PartialHealTeam()
+    private void RefreshTeamDisplay()
     {
-        if (PersistentTeamManager.Instance == null)
+        if (teamDisplay != null)
         {
-            Debug.LogError("[RestArea] PersistentTeamManager not found!");
-            return;
-        }
-
-        // Kiểm tra team đã full HP chưa
-        if (PersistentTeamManager.Instance.GetTotalCurrentHP() >= PersistentTeamManager.Instance.GetTotalMaxHP())
-        {
-            Debug.Log("[RestArea] Team already at full HP!");
-            return;
-        }
-
-        // Kiểm tra coins
-        if (MenuManager.Instance != null)
-        {
-            if (MenuManager.Instance.SpendCoins(partialHealCost))
-            {
-                PersistentTeamManager.Instance.HealTeam(partialHealAmount);
-                Debug.Log($"[RestArea] Team healed for {partialHealAmount} HP! (-{partialHealCost} coins)");
-
-                UpdateCoinUI();
-                PersistentTeamManager.Instance.LogTeamStatus();
-            }
-            else
-            {
-                Debug.LogWarning("[RestArea] Not enough coins for partial heal!");
-            }
-        }
-        else
-        {
-            // Không có MenuManager thì heal free
-            PersistentTeamManager.Instance.HealTeam(partialHealAmount);
-            Debug.Log($"[RestArea] Team healed for {partialHealAmount} HP (FREE)!");
-            PersistentTeamManager.Instance.LogTeamStatus();
+            teamDisplay.RefreshDisplay();
         }
     }
 
@@ -138,16 +107,24 @@ public class RestAreaManager : MonoBehaviour
         SceneManager.LoadScene("Menu");
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         if (MenuManager.Instance != null)
             MenuManager.Instance.OnCoinsChanged += UpdateCoinUI;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         if (MenuManager.Instance != null)
             MenuManager.Instance.OnCoinsChanged -= UpdateCoinUI;
+    }
+
+    public void UpdateCoinUI()
+    {
+        if (coinText != null && MenuManager.Instance != null)
+        {
+            coinText.text = MenuManager.Instance.PlayerCoins.ToString();
+        }
     }
 
     public void UpdateCoinUI(int newCoin)

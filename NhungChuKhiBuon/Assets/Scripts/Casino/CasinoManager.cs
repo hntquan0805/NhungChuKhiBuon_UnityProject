@@ -39,8 +39,8 @@ public class CasinoMangaer : MonoBehaviour
         swapButton.onClick.AddListener(OnSwapButtonClicked); // THÊM LISTENER
         endButton.onClick.AddListener(OnEndButtonClicked);
 
-        discardButton.interactable = false;
-        swapButton.interactable = false; // VÔ HIỆU HÓA BAN ĐẦU
+        SetButtonState(discardButton, false);
+        SetButtonState(swapButton, false);
     }
 
     void SetupGame()
@@ -138,8 +138,8 @@ public class CasinoMangaer : MonoBehaviour
 
             selectedCardToSwap = null;
             selectedCardToDiscard = null;
-            swapButton.interactable = false;
-            discardButton.interactable = false;
+            SetButtonState(swapButton, false);
+            SetButtonState(discardButton, false);
 
             Debug.Log("Bỏ chọn card");
             return;
@@ -167,8 +167,8 @@ public class CasinoMangaer : MonoBehaviour
         selectedCardToDiscard = card;
 
         // Bật các nút tùy theo chức năng nào chưa dùng
-        swapButton.interactable = !hasSwapped;
-        discardButton.interactable = !hasDiscarded;
+        SetButtonState(swapButton, !hasSwapped);
+        SetButtonState(discardButton, !hasDiscarded);
 
         Debug.Log($"Chọn card - Swap available: {!hasSwapped}, Discard available: {!hasDiscarded}");
     }
@@ -184,12 +184,12 @@ public class CasinoMangaer : MonoBehaviour
                 selectedCardToDiscard.UpdateCardColor();
 
                 hasDiscarded = true;
-                discardButton.interactable = false;
+                SetButtonState(discardButton, false);
 
                 // Reset selection
                 selectedCardToDiscard = null;
                 selectedCardToSwap = null;
-                swapButton.interactable = false;
+                SetButtonState(swapButton, false);
 
                 messageText.text = $"Đã bỏ bài! Trừ {discardCost} coin.";
                 UpdateUI();
@@ -225,8 +225,8 @@ public class CasinoMangaer : MonoBehaviour
 
                 hasSwapped = true;
                 hasDiscarded = true;
-                swapButton.interactable = false;
-                discardButton.interactable = false;
+                SetButtonState(swapButton, false);
+                SetButtonState(discardButton, false);
 
                 if (selectedCardToSwap != null)
                 {
@@ -339,6 +339,24 @@ public class CasinoMangaer : MonoBehaviour
 
     void ReturnToBetting()
     {
-        MenuManager.Instance.LoadScene("Map");
+        MenuManager.Instance.LoadScene("Menu");
     }
+    void SetButtonState(Button btn, bool enable)
+    {
+        btn.interactable = enable;
+
+        // Lấy Canvas Group từ Button
+        CanvasGroup group = btn.GetComponent<CanvasGroup>();
+
+        if (group != null)
+        {
+            // Nếu enable thì hiện rõ (1), nếu disable thì mờ đi (ví dụ 0.5)
+            group.alpha = enable ? 1f : 0.5f;
+
+            // Chặn hoặc cho phép tương tác chuột
+            group.interactable = enable;
+            group.blocksRaycasts = enable;
+        }
+    }
+
 }
