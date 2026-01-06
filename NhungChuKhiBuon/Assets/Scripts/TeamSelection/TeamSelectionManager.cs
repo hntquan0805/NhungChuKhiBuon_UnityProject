@@ -13,7 +13,7 @@ public class TeamSelectionManager : MonoBehaviour
     public Color disabledColor = new Color(1f, 1f, 1f, 0.3f);
 
     [Header("Scene Management")]
-    public string nextSceneName = "Menu"; // Chuyển đến Menu thay vì TestScene
+    public string nextSceneName = "Map";
 
     [Header("Optional")]
     public Button startGameButton;
