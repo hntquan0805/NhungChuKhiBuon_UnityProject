@@ -6,8 +6,11 @@ public class MainMenu : MonoBehaviour
     [Header("Menu Buttons")]
     public Button enterBattleButton;
     public Button enterArenaButton;
+    [Header("Các nút bấm")]
+    public Button playButton;
     public Button enterCasinoButton;
     public Button enterRestAreaButton;
+    public Button hospital;
 
     //[Header("Optional - Team HP Display")]
     //public TeamHPDisplay teamHPDisplay;
@@ -20,12 +23,17 @@ public class MainMenu : MonoBehaviour
 
         if (enterArenaButton != null)
             enterArenaButton.onClick.AddListener(EnterArena);
+        if (playButton != null)
+            playButton.onClick.AddListener(EnterMap);
 
         if (enterCasinoButton != null)
             enterCasinoButton.onClick.AddListener(EnterCasino);
 
         if (enterRestAreaButton != null)
             enterRestAreaButton.onClick.AddListener(EnterRestArea);
+
+        if (hospital != null)
+            hospital.onClick.AddListener(EnterHospital);
 
         // Update team HP display
         //if (teamHPDisplay != null)
@@ -61,6 +69,14 @@ public class MainMenu : MonoBehaviour
         MenuManager.Instance.LoadScene(MenuManager.BATTLE_SCENE);
     }
 
+
+    void EnterHospital()
+    {
+        Debug.Log("[Menu] Entering Hospital...");
+        MenuManager.Instance.LoadScene(MenuManager.HOSPITAL_SCENE);
+    }
+
+
     void EnterArena()
     {
         if (PersistentTeamManager.Instance == null || !PersistentTeamManager.Instance.IsTeamAlive())
@@ -72,6 +88,11 @@ public class MainMenu : MonoBehaviour
         // Cảnh báo về Arena debuff
         Debug.Log("[Menu] ⚠ Entering Arena - Your team will lose 30% HP at start!");
         MenuManager.Instance.LoadScene(MenuManager.ARENA_SCENE);
+    }
+
+    void EnterMap()
+    {
+        MenuManager.Instance.LoadScene("Map");
     }
 
     void EnterCasino()

@@ -250,6 +250,11 @@ public class BattleManager : MonoBehaviour
 
     void LoadVictoryScene()
     {
+        if (PersistentTeamManager.Instance != null && playerTeam != null)
+        {
+            PersistentTeamManager.Instance.SaveTeamState(playerTeam.players);
+        }
+
         SceneManager.LoadScene(victorySceneName);
     }
 
