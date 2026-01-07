@@ -7,6 +7,7 @@ public class MainMenu : MonoBehaviour
     public Button playButton;
     public Button enterCasinoButton;
     public Button enterRestAreaButton;
+    public Button hospital;
 
     void Start()
     {
@@ -23,6 +24,11 @@ public class MainMenu : MonoBehaviour
     void EnterMap()
     {
         MenuManager.Instance.LoadScene("TeamSelection");
+    }
+
+    void EnterMap()
+    {
+        MenuManager.Instance.LoadScene("Map");
     }
 
     void EnterCasino()

@@ -110,10 +110,11 @@ MonoBehaviour:
   animator: {fileID: 7536167094695924574}
   stats:
     maxHP: 850
-    atk: 150
+    atk: 500
     def: 100
     crit: 15
     critDam: 150
+    characterClass: 1
   shieldAmount: 0
 --- !u!95 &7536167094695924574
 Animator:
