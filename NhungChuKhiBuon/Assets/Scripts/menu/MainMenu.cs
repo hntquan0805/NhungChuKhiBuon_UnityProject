@@ -25,12 +25,12 @@ public class MainMenu : MonoBehaviour
     {
         MenuManager.Instance.LoadScene("TeamSelection");
     }
-
+    /*
     void EnterMap()
     {
         MenuManager.Instance.LoadScene("Map");
     }
-
+    */
     void EnterCasino()
     {
         MenuManager.Instance.LoadScene("BettingScene");
