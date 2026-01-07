@@ -104,7 +104,7 @@ public class RestAreaManager : MonoBehaviour
             shopManager.ResetShop();
         }
 
-        SceneManager.LoadScene("Menu");
+        SceneManager.LoadScene("Map");
     }
 
     private void OnEnable()

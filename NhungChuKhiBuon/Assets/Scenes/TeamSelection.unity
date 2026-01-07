@@ -311,7 +311,7 @@ MonoBehaviour:
   - {fileID: 1908126311}
   disabledColor: {r: 1, g: 1, b: 1, a: 0.3}
   nextSceneName: Map
-  startGameButton: {fileID: 1256933461}
+  startGameButton: {fileID: 415766749}
 --- !u!4 &84114614
 Transform:
   m_ObjectHideFlags: 0

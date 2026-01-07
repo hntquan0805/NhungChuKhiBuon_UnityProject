@@ -339,7 +339,7 @@ public class CasinoMangaer : MonoBehaviour
 
     void ReturnToBetting()
     {
-        MenuManager.Instance.LoadScene("Menu");
+        MenuManager.Instance.LoadScene("Map");
     }
     void SetButtonState(Button btn, bool enable)
     {
