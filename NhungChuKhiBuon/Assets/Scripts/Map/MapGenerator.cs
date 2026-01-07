@@ -1,6 +1,20 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
+
+// Các class dữ liệu giữ nguyên
+public enum NodeState { Locked, Unlocked, Completed }
+
+[System.Serializable]
+public class MapNodeData
+{
+    public int x, y;
+    public string typeName;
+    public string sceneName;
+    public NodeState state;
+    public List<Vector2Int> outgoing = new List<Vector2Int>();
+}
 
 [System.Serializable]
 public class NodeTypeConfig
@@ -13,170 +27,262 @@ public class NodeTypeConfig
 
 public class MapGenerator : MonoBehaviour
 {
-    [Header("Cài đặt Prefab")]
+    [Header("Cài đặt")]
     public GameObject nodePrefab;
     public GameObject linePrefab;
     public Transform mapContainer;
 
-    [Header("Cấu hình Loại Nút")]
+    [Header("Cấu hình Map")]
+    public List<int> nodesPerLayer = new List<int> { 3, 3, 3, 3, 3, 3, 2, 1 };
+    public float xSpacing = 300f;
+    public float ySpacing = 150f;
+
+    [Header("Loại nút")]
     public List<NodeTypeConfig> nodeTypes;
     public NodeTypeConfig bossNode;
 
-    [Header("Cấu hình Bản đồ")]
-    public List<int> nodesPerLayer = new List<int> { 3, 3, 3, 3, 1 };
-    public float xSpacing = 200f;
-    public float ySpacing = 150f;
-
-    private List<List<MapNode>> mapGrid = new List<List<MapNode>>();
+    public static List<List<MapNodeData>> savedMapData;
 
     void Start()
     {
-        GenerateNodes();
-        ConnectNodes();
-        DrawLines();
+        if (savedMapData == null || savedMapData.Count == 0)
+        {
+            GenerateMapData();
+        }
+
+        SpawnMapVisuals();
     }
 
-    void GenerateNodes()
+    void GenerateMapData()
     {
-        float mapWidth = (nodesPerLayer.Count - 1) * xSpacing;
-        float startX = -mapWidth / 2;
+        savedMapData = new List<List<MapNodeData>>();
+        int lastRestLayerIndex = -100;
 
+        // 1. TẠO NODE (LOGIC CŨ ĐÃ CHUẨN)
         for (int i = 0; i < nodesPerLayer.Count; i++)
         {
-            List<MapNode> currentLayerNodes = new List<MapNode>();
-            int nodeCount = nodesPerLayer[i];
+            List<MapNodeData> currentLayer = new List<MapNodeData>();
+            int count = nodesPerLayer[i];
+            List<NodeTypeConfig> layerConfigs = new List<NodeTypeConfig>();
 
-            List<string> usedSpecialTypesInThisLayer = new List<string>();
+            if (i == nodesPerLayer.Count - 1)
+            {
+                layerConfigs.Add(bossNode);
+            }
+            else
+            {
+                NodeTypeConfig fightConfig = nodeTypes.Find(t => t.typeName == "Fight");
+                if (fightConfig == null) fightConfig = nodeTypes[0];
+                layerConfigs.Add(fightConfig);
 
+                bool addRest = false;
+                bool validGap = (i - lastRestLayerIndex > 2);
+
+                if (i == 2 && validGap) { if (Random.value > 0.5f) addRest = true; }
+                else if (i == 3) { if (lastRestLayerIndex != 2) addRest = true; }
+                else if (i == 5 && validGap) { if (Random.value > 0.5f) addRest = true; }
+                else if (i == 6) { if (lastRestLayerIndex != 5 && validGap) addRest = true; }
+
+                if (addRest)
+                {
+                    NodeTypeConfig restConfig = nodeTypes.Find(t => t.typeName == "Rest" || t.typeName == "Nghỉ ngơi");
+                    if (restConfig != null) { layerConfigs.Add(restConfig); lastRestLayerIndex = i; }
+                }
+
+                while (layerConfigs.Count < count)
+                {
+                    List<NodeTypeConfig> allowedTypes = nodeTypes.Where(t => t.typeName != "Rest" && t.typeName != "Nghỉ ngơi").ToList();
+                    if (allowedTypes.Count > 0) layerConfigs.Add(allowedTypes[Random.Range(0, allowedTypes.Count)]);
+                    else layerConfigs.Add(fightConfig);
+                }
+                layerConfigs = layerConfigs.OrderBy(x => Random.value).ToList();
+            }
+
+            for (int j = 0; j < count; j++)
+            {
+                MapNodeData data = new MapNodeData();
+                data.x = i;
+                data.y = j;
+                NodeTypeConfig config = (j < layerConfigs.Count) ? layerConfigs[j] : nodeTypes[0];
+                data.typeName = config.typeName;
+                data.sceneName = config.sceneName;
+                data.state = (i == 0) ? NodeState.Unlocked : NodeState.Locked;
+                currentLayer.Add(data);
+            }
+            savedMapData.Add(currentLayer);
+        }
+
+        // 2. TẠO KẾT NỐI (LOGIC MỚI - DỆT LƯỚI DÀY HƠN)
+        for (int i = 0; i < savedMapData.Count - 1; i++)
+        {
+            var currentLayer = savedMapData[i];
+            var nextLayer = savedMapData[i + 1];
+
+            // Bước A: Đảm bảo mỗi node đều có ít nhất 1 đường đi (Forward)
+            foreach (var node in currentLayer)
+            {
+                AddConnection(node, GetRandomNode(nextLayer));
+            }
+
+            // Bước B: Đảm bảo mỗi node đích đều có ít nhất 1 đầu vào (Backward) - Tránh node mồ côi
+            foreach (var target in nextLayer)
+            {
+                bool hasParent = false;
+                foreach (var prev in currentLayer)
+                    if (prev.outgoing.Contains(new Vector2Int(target.x, target.y))) hasParent = true;
+
+                if (!hasParent)
+                    AddConnection(GetRandomNode(currentLayer), target);
+            }
+
+            // Bước C: [QUAN TRỌNG] Tăng cường kết nối (Weaving)
+            // Nếu node nào mới chỉ có 1 đường ra -> Cố gắng thêm 1 đường nữa
+            foreach (var node in currentLayer)
+            {
+                // Nếu tầng sau là Boss (chỉ có 1 node) thì không cần rẽ nhánh
+                if (nextLayer.Count <= 1) continue;
+
+                // Nếu đang chỉ có 1 đường đi HOẶC ngẫu nhiên 20% muốn thêm đường đi
+                if (node.outgoing.Count < 2 || Random.value < 0.2f)
+                {
+                    // Thử tìm một target khác chưa được nối
+                    int attempts = 0;
+                    while (attempts < 5) // Thử 5 lần random
+                    {
+                        var candidate = GetRandomNode(nextLayer);
+
+                        // Logic "Gần gũi": Ưu tiên nối với các node ở gần y (hàng xóm) để dây đỡ chéo quá xa (Optional)
+                        // Nếu muốn map rối rắm thì bỏ qua check này cũng được.
+                        if (Mathf.Abs(candidate.y - node.y) > 1 && Random.value > 0.3f)
+                        {
+                            attempts++;
+                            continue; // Bỏ qua nếu quá xa (để map đẹp hơn)
+                        }
+
+                        if (!node.outgoing.Contains(new Vector2Int(candidate.x, candidate.y)))
+                        {
+                            AddConnection(node, candidate);
+                            break; // Đã thêm được, thoát
+                        }
+                        attempts++;
+                    }
+                }
+            }
+        }
+    }
+
+    // Hàm tiện ích lấy node ngẫu nhiên
+    MapNodeData GetRandomNode(List<MapNodeData> list)
+    {
+        return list[Random.Range(0, list.Count)];
+    }
+
+    void AddConnection(MapNodeData from, MapNodeData to)
+    {
+        if (!from.outgoing.Contains(new Vector2Int(to.x, to.y)))
+            from.outgoing.Add(new Vector2Int(to.x, to.y));
+    }
+
+    // --- CÁC HÀM VẼ (GIỮ NGUYÊN) ---
+    void SpawnMapVisuals()
+    {
+        foreach (Transform child in mapContainer) Destroy(child.gameObject);
+
+        RectTransform containerRect = mapContainer.GetComponent<RectTransform>();
+
+        containerRect.anchorMin = new Vector2(0, 0);
+        containerRect.anchorMax = new Vector2(0, 1);
+        containerRect.pivot = new Vector2(0, 0.5f);
+
+        float startX = 200f;
+        float endPadding = 200f;
+        float contentWidth = startX + ((nodesPerLayer.Count - 1) * xSpacing) + endPadding;
+
+        containerRect.sizeDelta = new Vector2(contentWidth, 0);
+        containerRect.anchoredPosition = new Vector2(0, 0);
+
+        MapNode[,] nodeLookup = new MapNode[savedMapData.Count, 20];
+
+        for (int i = 0; i < savedMapData.Count; i++)
+        {
+            int nodeCount = savedMapData[i].Count;
             for (int j = 0; j < nodeCount; j++)
             {
-                GameObject nodeObj = Instantiate(nodePrefab, mapContainer);
-                nodeObj.name = $"Node L{i}-{j}";
+                MapNodeData data = savedMapData[i][j];
+                NodeTypeConfig config = nodeTypes.Find(t => t.typeName == data.typeName);
+                if (i == savedMapData.Count - 1) config = bossNode;
+                if (config == null && nodeTypes.Count > 0) config = nodeTypes[0];
+
+                GameObject obj = Instantiate(nodePrefab, mapContainer);
+                RectTransform nodeRect = obj.GetComponent<RectTransform>();
+
+                nodeRect.anchorMin = new Vector2(0, 0.5f);
+                nodeRect.anchorMax = new Vector2(0, 0.5f);
+                nodeRect.pivot = new Vector2(0.5f, 0.5f);
 
                 float xPos = startX + (i * xSpacing);
                 float yPos = (j - (nodeCount - 1) / 2.0f) * ySpacing;
-                nodeObj.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, yPos);
 
-                MapNode nodeScript = nodeObj.GetComponent<MapNode>();
-                NodeTypeConfig config;
+                nodeRect.anchoredPosition = new Vector2(xPos, yPos);
 
-                if (i == nodesPerLayer.Count - 1)
-                {
-                    config = bossNode;
-                }
-                else
-                {
-                    List<NodeTypeConfig> allowedTypes = new List<NodeTypeConfig>();
-
-                    foreach (var type in nodeTypes)
-                    {
-                        bool isRestricted = (type.typeName == "Casino" ||
-                                             type.typeName == "Rest");
-
-                        if (isRestricted && usedSpecialTypesInThisLayer.Contains(type.typeName))
-                        {
-                            continue;
-                        }
-
-                        allowedTypes.Add(type);
-                    }
-
-                    if (allowedTypes.Count > 0)
-                    {
-                        config = allowedTypes[Random.Range(0, allowedTypes.Count)];
-
-                        if (config.typeName == "Casino" ||
-                            config.typeName == "Rest")
-                        {
-                            usedSpecialTypesInThisLayer.Add(config.typeName);
-                        }
-                    }
-                    else
-                    {
-                        config = nodeTypes[0];
-                    }
-                }
-
-                nodeScript.Setup(config.icon, config.color, i != 0, config.sceneName);
-                currentLayerNodes.Add(nodeScript);
+                MapNode script = obj.GetComponent<MapNode>();
+                script.Setup(config.icon, config.color, data.sceneName, i, j, data.state);
+                nodeLookup[i, j] = script;
             }
-            mapGrid.Add(currentLayerNodes);
         }
-    }
 
-    void ConnectNodes()
-    {
-        for (int i = 0; i < mapGrid.Count - 1; i++)
+        for (int i = 0; i < savedMapData.Count; i++)
         {
-            List<MapNode> currentLayer = mapGrid[i];
-            List<MapNode> nextLayer = mapGrid[i + 1];
-
-            foreach (var node in currentLayer)
+            foreach (var nodeData in savedMapData[i])
             {
-                MapNode target = GetRandomNode(nextLayer);
-                if (!node.outgoingNodes.Contains(target))
+                foreach (var targetPos in nodeData.outgoing)
                 {
-                    node.outgoingNodes.Add(target);
-                }
-            }
-
-            foreach (var targetNode in nextLayer)
-            {
-                bool hasConnection = false;
-                foreach (var previousNode in currentLayer)
-                {
-                    if (previousNode.outgoingNodes.Contains(targetNode))
-                    {
-                        hasConnection = true;
-                        break;
-                    }
-                }
-
-                if (!hasConnection)
-                {
-                    MapNode randomParent = currentLayer[Random.Range(0, currentLayer.Count)];
-                    if (!randomParent.outgoingNodes.Contains(targetNode))
-                    {
-                        randomParent.outgoingNodes.Add(targetNode);
-                    }
+                    MapNode fromObj = nodeLookup[i, nodeData.y];
+                    MapNode toObj = nodeLookup[targetPos.x, targetPos.y];
+                    if (fromObj != null && toObj != null)
+                        CreateLine(fromObj.GetComponent<RectTransform>(), toObj.GetComponent<RectTransform>());
                 }
             }
         }
+
+        Canvas.ForceUpdateCanvases();
+        ScrollRect scrollRect = mapContainer.GetComponentInParent<ScrollRect>();
+        if (scrollRect != null) scrollRect.horizontalNormalizedPosition = 0f;
     }
 
-    MapNode GetRandomNode(List<MapNode> nextLayer)
+    void CreateLine(RectTransform A, RectTransform B)
     {
-        return nextLayer[Random.Range(0, nextLayer.Count)];
+        GameObject line = Instantiate(linePrefab, mapContainer);
+        line.transform.SetAsFirstSibling();
+        RectTransform rect = line.GetComponent<RectTransform>();
+
+        rect.anchorMin = new Vector2(0, 0.5f);
+        rect.anchorMax = new Vector2(0, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+
+        Vector2 dir = (B.anchoredPosition - A.anchoredPosition).normalized;
+        float dist = Vector2.Distance(A.anchoredPosition, B.anchoredPosition);
+
+        rect.anchoredPosition = A.anchoredPosition + dir * dist * 0.5f;
+        rect.sizeDelta = new Vector2(dist, 3f);
+        rect.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
     }
 
-    void DrawLines()
+    public static void OnNodeSelected(int x, int y)
     {
-        foreach (var layer in mapGrid)
+        var currentNode = savedMapData[x][y];
+        currentNode.state = NodeState.Completed;
+
+        foreach (var node in savedMapData[x])
         {
-            foreach (var node in layer)
-            {
-                foreach (var target in node.outgoingNodes)
-                {
-                    CreateLineConnection(node.GetComponent<RectTransform>(), target.GetComponent<RectTransform>());
-                }
-            }
+            if (node != currentNode) node.state = NodeState.Locked;
         }
-    }
 
-    void CreateLineConnection(RectTransform dotA, RectTransform dotB)
-    {
-        GameObject lineObj = Instantiate(linePrefab, mapContainer);
-        lineObj.transform.SetAsFirstSibling();
-
-        RectTransform rect = lineObj.GetComponent<RectTransform>();
-
-        Vector2 dir = (dotB.anchoredPosition - dotA.anchoredPosition).normalized;
-        float distance = Vector2.Distance(dotA.anchoredPosition, dotB.anchoredPosition);
-
-        rect.anchoredPosition = dotA.anchoredPosition + dir * distance * 0.5f;
-        rect.sizeDelta = new Vector2(distance, 3f);
-
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        rect.localRotation = Quaternion.Euler(0, 0, angle);
+        foreach (var targetIndex in currentNode.outgoing)
+        {
+            var targetNode = savedMapData[targetIndex.x][targetIndex.y];
+            if (targetNode.state == NodeState.Locked)
+                targetNode.state = NodeState.Unlocked;
+        }
     }
 }
