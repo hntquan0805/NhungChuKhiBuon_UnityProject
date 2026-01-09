@@ -102,10 +102,8 @@ public class CardActionQueue : MonoBehaviour
     {
         BattleManager.Instance.state = TurnState.EnemyInterrupt;
 
-        // Set target là cả PlayerTeam
         if (BattleManager.Instance.playerTeam == null)
         {
-            Debug.LogError("PlayerTeam is null!");
             yield break;
         }
 

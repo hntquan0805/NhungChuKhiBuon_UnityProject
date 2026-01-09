@@ -58,7 +58,6 @@ public class MapGenerator : MonoBehaviour
         savedMapData = new List<List<MapNodeData>>();
         int lastRestLayerIndex = -100;
 
-        // 1. TẠO NODE (LOGIC CŨ ĐÃ CHUẨN)
         for (int i = 0; i < nodesPerLayer.Count; i++)
         {
             List<MapNodeData> currentLayer = new List<MapNodeData>();
@@ -112,19 +111,18 @@ public class MapGenerator : MonoBehaviour
             savedMapData.Add(currentLayer);
         }
 
-        // 2. TẠO KẾT NỐI (LOGIC MỚI - DỆT LƯỚI DÀY HƠN)
         for (int i = 0; i < savedMapData.Count - 1; i++)
         {
             var currentLayer = savedMapData[i];
             var nextLayer = savedMapData[i + 1];
 
-            // Bước A: Đảm bảo mỗi node đều có ít nhất 1 đường đi (Forward)
+            // Đảm bảo mỗi node đều có ít nhất 1 đường đi
             foreach (var node in currentLayer)
             {
                 AddConnection(node, GetRandomNode(nextLayer));
             }
 
-            // Bước B: Đảm bảo mỗi node đích đều có ít nhất 1 đầu vào (Backward) - Tránh node mồ côi
+            // Đảm bảo mỗi node đích đều có ít nhất 1 đầu vào
             foreach (var target in nextLayer)
             {
                 bool hasParent = false;
@@ -135,19 +133,15 @@ public class MapGenerator : MonoBehaviour
                     AddConnection(GetRandomNode(currentLayer), target);
             }
 
-            // Bước C: [QUAN TRỌNG] Tăng cường kết nối (Weaving)
-            // Nếu node nào mới chỉ có 1 đường ra -> Cố gắng thêm 1 đường nữa
+            // Tăng cường kết nối
             foreach (var node in currentLayer)
             {
-                // Nếu tầng sau là Boss (chỉ có 1 node) thì không cần rẽ nhánh
                 if (nextLayer.Count <= 1) continue;
 
-                // Nếu đang chỉ có 1 đường đi HOẶC ngẫu nhiên 20% muốn thêm đường đi
                 if (node.outgoing.Count < 2 || Random.value < 0.2f)
                 {
-                    // Thử tìm một target khác chưa được nối
                     int attempts = 0;
-                    while (attempts < 5) // Thử 5 lần random
+                    while (attempts < 5)
                     {
                         var candidate = GetRandomNode(nextLayer);
 
@@ -171,7 +165,6 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    // Hàm tiện ích lấy node ngẫu nhiên
     MapNodeData GetRandomNode(List<MapNodeData> list)
     {
         return list[Random.Range(0, list.Count)];
@@ -183,7 +176,6 @@ public class MapGenerator : MonoBehaviour
             from.outgoing.Add(new Vector2Int(to.x, to.y));
     }
 
-    // --- CÁC HÀM VẼ (GIỮ NGUYÊN) ---
     void SpawnMapVisuals()
     {
         foreach (Transform child in mapContainer) Destroy(child.gameObject);

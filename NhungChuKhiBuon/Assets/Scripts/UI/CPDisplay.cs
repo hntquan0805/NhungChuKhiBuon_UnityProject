@@ -32,7 +32,15 @@ public class IndividualCPDisplay : MonoBehaviour
         // Cập nhật text
         if (cpText != null)
         {
-            cpText.text = string.Format(cpFormat, currentCP);
+            // Kiểm tra nếu là MinionEnemy thì hiển thị "X"
+            if (enemy is MinionEnemy)
+            {
+                cpText.text = "X";
+            }
+            else
+            {
+                cpText.text = string.Format(cpFormat, currentCP);
+            }
         }
 
         // Cập nhật icons (nếu có)
