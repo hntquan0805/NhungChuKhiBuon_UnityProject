@@ -36,7 +36,7 @@ public abstract class CharacterBase : MonoBehaviour
         PlayHeal();
     }
 
-    protected virtual void PlayHurt()
+    public virtual void PlayHurt()
     {
         if (animator != null)
         {

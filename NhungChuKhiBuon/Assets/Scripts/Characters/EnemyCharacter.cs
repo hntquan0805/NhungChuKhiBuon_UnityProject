@@ -30,7 +30,7 @@ public class EnemyCharacter : CharacterBase
     [SerializeField] private int passiveBuffStacks = 2;
 
     private int currentCP;
-    private PlayerTeam targetTeam; // Đổi từ PlayerCharacter → PlayerTeam
+    protected PlayerTeam targetTeam; // Đổi từ PlayerCharacter → PlayerTeam (protected để subclass truy cập)
     private bool isDead = false;
     private int turnCounter = 0;
     
@@ -52,8 +52,8 @@ public class EnemyCharacter : CharacterBase
 
     private void Start()
     {
-        // Apply passive buff khi vào trận
-        ApplyPassiveBuff();
+        // Apply passive buff khi vào trận (có thể override)
+        ApplyStartPassive();
     }
 
     public void InitializeCP(int min, int max)
@@ -65,6 +65,21 @@ public class EnemyCharacter : CharacterBase
     public override void TakeDamage(int amount)
     {
         if (isDead) return;
+
+        // Kiểm tra Stealth buff
+        BuffInstance stealthBuff = buffs.Find(b => b.type == BuffType.Stealth);
+        if (stealthBuff != null)
+        {
+            // Giảm 20% sát thương nhận
+            amount = Mathf.RoundToInt(amount * 0.8f);
+            
+            // Xóa Stealth sau khi bị tấn công
+            buffs.Remove(stealthBuff);
+            UpdateBuffUI();
+            
+            // Gọi OnStealthLost để subclass có thể override
+            OnStealthLost();
+        }
 
         currentHP -= amount;
         currentHP = Mathf.Max(currentHP, 0);
@@ -373,11 +388,11 @@ public class EnemyCharacter : CharacterBase
     
     public void ProcessDebuffsAtTurnStart()
     {
-        // Tăng turn counter và check passive ability
+        // Tăng turn counter và check passive ability (có thể override)
         turnCounter++;
         if (turnCounter >= passiveTurnInterval)
         {
-            ApplyPassiveBuff();
+            ApplyTurnPassive();
             turnCounter = 0;
         }
         
@@ -428,12 +443,10 @@ public class EnemyCharacter : CharacterBase
     
     private void UpdateDebuffUI()
     {
-        // Xóa tất cả icon cũ
         ClearDebuffIcons();
         
         if (debuffIconContainer == null || debuffIconPrefab == null)
         {
-            Debug.LogWarning($"[{gameObject.name}] DebuffIconContainer or Prefab is null!");
             return;
         }
         
@@ -474,15 +487,21 @@ public class EnemyCharacter : CharacterBase
     }
     
     // Buff system methods
-    private void ApplyPassiveBuff()
+    // Virtual method - Apply passive khi bắt đầu battle
+    protected virtual void ApplyStartPassive()
     {
-        if (increaseAttackIcon == null)
+        if (increaseAttackIcon != null)
         {
-            Debug.LogWarning($"[{gameObject.name}] IncreaseAttackIcon not assigned!");
-            return;
+            AddBuff(BuffType.IncreaseAttack, passiveBuffStacks, increaseAttackIcon);
         }
-        
-        AddBuff(BuffType.IncreaseAttack, passiveBuffStacks, increaseAttackIcon);
+    }
+    
+    protected virtual void ApplyTurnPassive()
+    {
+        if (increaseAttackIcon != null)
+        {
+            AddBuff(BuffType.IncreaseAttack, passiveBuffStacks, increaseAttackIcon);
+        }
     }
     
     public void AddBuff(BuffType type, int stacks, Sprite icon)
@@ -580,6 +599,18 @@ public class EnemyCharacter : CharacterBase
                 Destroy(icon);
         }
         buffIcons.Clear();
+    }
+    
+    // Virtual method để subclass có thể override khi mất Stealth
+    protected virtual void OnStealthLost()
+    {
+        // Override trong BossEnemy để reset turn counter
+    }
+    
+    // Kiểm tra xem enemy có buff Stealth không
+    public bool HasStealth()
+    {
+        return buffs.Exists(b => b.type == BuffType.Stealth);
     }
 }
 

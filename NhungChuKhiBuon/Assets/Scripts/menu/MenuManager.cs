@@ -14,7 +14,7 @@ public class MenuManager : MonoBehaviour
 
     // Scene name constants - đảm bảo tên đúng với Build Settings
     public const string MENU_SCENE = "Menu";
-    public const string BATTLE_SCENE = "BattleScene";
+    public const string BATTLE_SCENE = "BossScene";
     public const string ARENA_SCENE = "Arena";
     public const string CASINO_SCENE = "BettingScene";
     public const string REST_AREA_SCENE = "RestArea";
@@ -27,7 +27,6 @@ public class MenuManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("[MenuManager] Initialized");
         }
         else
         {
@@ -35,41 +34,28 @@ public class MenuManager : MonoBehaviour
         }
     }
 
-    // Thêm coins cho player
     public void AddCoins(int amount)
     {
         PlayerCoins += amount;
         OnCoinsChanged?.Invoke(PlayerCoins);
-        Debug.Log($"[MenuManager] +{amount} coins. Total: {PlayerCoins}");
     }
 
-    // Chi tiêu coins nếu đủ
     public bool SpendCoins(int amount)
     {
         if (PlayerCoins >= amount)
         {
             PlayerCoins -= amount;
             OnCoinsChanged?.Invoke(PlayerCoins);
-            Debug.Log($"[MenuManager] -{amount} coins. Remaining: {PlayerCoins}");
             return true;
         }
 
-        Debug.LogWarning($"[MenuManager] Not enough coins! Need {amount}, have {PlayerCoins}");
         return false;
     }
 
-    // Load scene theo tên
     public void LoadScene(string sceneName)
     {
-        Debug.Log($"[MenuManager] Loading scene: {sceneName}");
-
-        // Validate scene exists in build settings
-        if (!SceneExists(sceneName))
-        {
-            Debug.LogError($"[MenuManager] Scene '{sceneName}' not found in Build Settings!");
-            return;
-        }
-
+        if (!SceneExists(sceneName)) return;
+        
         SceneManager.LoadScene(sceneName);
     }
 
@@ -106,7 +92,6 @@ public class MenuManager : MonoBehaviour
         return currentScene == BATTLE_SCENE || currentScene == ARENA_SCENE;
     }
 
-    // Reset game data
     public void ResetGameData()
     {
         PlayerCoins = 10000;
@@ -117,8 +102,6 @@ public class MenuManager : MonoBehaviour
         {
             PersistentTeamManager.Instance.ClearTeamData();
         }
-
-        Debug.Log("[MenuManager] Game data reset");
     }
 
     // Debug: Log game state
@@ -141,22 +124,14 @@ public class MenuManager : MonoBehaviour
 
     void Update()
     {
-        // ESC để về menu từ bất kỳ scene nào (trừ team selection)
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             string currentScene = GetCurrentSceneName();
 
             if (currentScene != MENU_SCENE && currentScene != TEAM_SELECTION_SCENE)
             {
-                Debug.Log("[MenuManager] ESC pressed - Returning to menu");
                 ReturnToMenu();
             }
-        }
-
-        // Debug hotkey: L để log game state
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            LogGameState();
         }
     }
 }

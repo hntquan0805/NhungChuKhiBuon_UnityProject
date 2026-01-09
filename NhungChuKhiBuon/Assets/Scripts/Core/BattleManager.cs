@@ -55,10 +55,6 @@ public class BattleManager : MonoBehaviour
         {
             handController.DrawNewHand();
         }
-        else
-        {
-            Debug.LogError("[BattleManager] HandController is NULL!");
-        }
     }
 
 
@@ -110,11 +106,7 @@ public class BattleManager : MonoBehaviour
 
     void ResetTurn()
     {
-        if (playerTeam == null)
-        {
-            Debug.LogError("PlayerTeam is null!");
-            return;
-        }
+        if (playerTeam == null) return;
 
         playerTeam.ClearShield();
 
@@ -212,6 +204,22 @@ public class BattleManager : MonoBehaviour
         foreach (var enemy in enemies)
         {
             if (enemy != null && enemy.GetCurrentHP() > 0)
+            {
+                return enemy;
+            }
+        }
+
+        return null;
+    }
+    
+    public EnemyCharacter GetFirstAliveEnemyWithoutStealth()
+    {
+        if (enemies == null || enemies.Count == 0)
+            return null;
+
+        foreach (var enemy in enemies)
+        {
+            if (enemy != null && enemy.GetCurrentHP() > 0 && !enemy.HasStealth())
             {
                 return enemy;
             }

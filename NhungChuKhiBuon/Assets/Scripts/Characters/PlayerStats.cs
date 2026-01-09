@@ -17,6 +17,13 @@ public class PlayerStats
     [Header("Class")]
     public CharacterClass characterClass = CharacterClass.Knight;
 
+    [Header("Audio Clips")]
+    public AudioClip attackSound;
+    public AudioClip hurtSound;
+    public AudioClip healSound;
+    public AudioClip shieldSound;
+    public AudioClip castSound;
+
     // Copy constructor
     public PlayerStats(PlayerStats other)
     {
@@ -26,6 +33,11 @@ public class PlayerStats
         this.crit = other.crit;
         this.critDam = other.critDam;
         this.characterClass = other.characterClass;
+        this.attackSound = other.attackSound;
+        this.hurtSound = other.hurtSound;
+        this.healSound = other.healSound;
+        this.shieldSound = other.shieldSound;
+        this.castSound = other.castSound;
     }
 
     public PlayerStats() { }

@@ -11,10 +11,20 @@ public class PlayerCharacter : CharacterBase
     // Buff system
     private List<BuffInstance> buffs = new List<BuffInstance>();
 
+    [Header("Audio")]
+    private AudioSource audioSource;
+
     protected override void Awake()
     {
         maxHP = stats.maxHP;
         base.Awake();
+        
+        // Thêm AudioSource component nếu chưa có
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
     }
 
     public void SetTarget(EnemyCharacter enemy)
@@ -33,6 +43,9 @@ public class PlayerCharacter : CharacterBase
     {
         if (animator != null)
             animator.SetTrigger("Attack");
+        
+        // Phát audio attack
+        PlaySound(stats.attackSound);
     }
 
     public void DealDamage()
@@ -83,6 +96,9 @@ public class PlayerCharacter : CharacterBase
         if (animator != null)
             animator.SetTrigger("Shield");
 
+        // Phát audio shield
+        PlaySound(stats.shieldSound);
+
         // Thêm shield vào team
         PlayerTeam team = GetComponentInParent<PlayerTeam>();
         if (team != null)
@@ -95,6 +111,9 @@ public class PlayerCharacter : CharacterBase
     {
         if (animator != null)
             animator.SetTrigger("Cast");
+        
+        // Phát audio cast
+        PlaySound(stats.castSound);
     }
 
     public int GetDefense()
@@ -139,20 +158,26 @@ public class PlayerCharacter : CharacterBase
         return stats.critDam;
     }
 
+    public override void TakeDamage(int amount)
+    {
+        base.TakeDamage(amount);
+        
+        // Phát audio hurt
+        PlaySound(stats.hurtSound);
+    }
+
     public override void Heal(int amount)
     {
         base.Heal(amount);
+        
+        // Phát audio heal
+        PlaySound(stats.healSound);
     }
 
     public void HealSilent(int amount)
     {
         currentHP += amount;
         currentHP = Mathf.Min(currentHP, maxHP);
-    }
-
-    public new void PlayHurt()
-    {
-        base.PlayHurt();
     }
 
     public int GetMaxHP()
@@ -196,9 +221,9 @@ public class PlayerCharacter : CharacterBase
             // 1. Áp dụng effect trước khi giảm stack
             if (buff.type == BuffType.ContinuousHeal)
             {
-                // Heal toàn đội 10% HP của caster
+                // Heal toàn đội với amount dựa trên maxHP của caster (không trigger animation)
                 int healAmount = buff.GetHealAmount();
-                HealWholeTeam(healAmount);
+                HealWholeTeamSilent(healAmount);
             }
             
             // 2. Giảm 1 stack
@@ -240,6 +265,22 @@ public class PlayerCharacter : CharacterBase
         }
     }
     
+    private void HealWholeTeamSilent(int amount)
+    {
+        // Tìm PlayerTeam trong scene và heal toàn đội (không trigger animation)
+        PlayerTeam team = FindObjectOfType<PlayerTeam>();
+        if (team != null)
+        {
+            foreach (var player in team.players)
+            {
+                if (player != null && player.GetCurrentHP() > 0)
+                {
+                    player.HealSilent(amount);
+                }
+            }
+        }
+    }
+    
     public List<BuffInstance> GetBuffs()
     {
         return buffs;
@@ -263,6 +304,16 @@ public class PlayerCharacter : CharacterBase
     {
         buffs.Clear();
         UpdateTeamBuffUI();
+    }
+
+    // ========== AUDIO SYSTEM ==========
+    
+    private void PlaySound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
     }
 }
 

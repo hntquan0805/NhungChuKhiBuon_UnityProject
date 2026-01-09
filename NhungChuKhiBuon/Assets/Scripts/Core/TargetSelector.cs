@@ -75,12 +75,7 @@ public class TargetSelector : MonoBehaviour
 
     public void SelectEnemy(EnemyCharacter enemy)
     {
-        if (enemy == null)
-        {
-            return;
-        }
-
-        if (enemy.GetCurrentHP() <= 0)
+        if (enemy == null || enemy.GetCurrentHP() <= 0 || enemy.HasStealth())
         {
             return;
         }
@@ -91,11 +86,11 @@ public class TargetSelector : MonoBehaviour
 
     public EnemyCharacter GetCurrentSelectedEnemy()
     {
-        // Kiểm tra enemy hiện tại có còn hợp lệ không
-        if (currentSelectedEnemy == null || currentSelectedEnemy.GetCurrentHP() <= 0)
+        // Kiểm tra enemy hiện tại có còn hợp lệ không (còn sống và không có Stealth)
+        if (currentSelectedEnemy == null || currentSelectedEnemy.GetCurrentHP() <= 0 || currentSelectedEnemy.HasStealth())
         {
-            // Tìm enemy mới còn sống
-            EnemyCharacter newTarget = BattleManager.Instance?.GetFirstAliveEnemy();
+            // Tìm enemy mới còn sống và không có Stealth
+            EnemyCharacter newTarget = BattleManager.Instance?.GetFirstAliveEnemyWithoutStealth();
 
             if (newTarget != null)
             {
@@ -140,7 +135,15 @@ public class TargetSelector : MonoBehaviour
                 // Chỉ cập nhật vị trí nếu followEnemy = true
                 if (followEnemy)
                 {
-                    targetingIndicator.transform.position = currentSelectedEnemy.transform.position + positionOffset;
+                    Vector3 offset = positionOffset;
+                    
+                    // Nếu là BossEnemy thì tăng Y thêm 1.25
+                    if (currentSelectedEnemy is BossEnemy)
+                    {
+                        offset.y += 1f;
+                    }
+                    
+                    targetingIndicator.transform.position = currentSelectedEnemy.transform.position + offset;
                 }
 
                 // Reset blink timer và bắt đầu nhấp nháy
@@ -174,7 +177,15 @@ public class TargetSelector : MonoBehaviour
         // Cập nhật vị trí target indicator theo enemy (nếu followEnemy = true)
         if (followEnemy && targetingIndicator != null && targetingIndicator.activeSelf && currentSelectedEnemy != null)
         {
-            targetingIndicator.transform.position = currentSelectedEnemy.transform.position + positionOffset;
+            Vector3 offset = positionOffset;
+            
+            // Nếu là BossEnemy thì tăng Y thêm 1.25
+            if (currentSelectedEnemy is BossEnemy)
+            {
+                offset.y += 1.25f;
+            }
+            
+            targetingIndicator.transform.position = currentSelectedEnemy.transform.position + offset;
         }
 
         // Animation nhấp nháy
@@ -272,7 +283,7 @@ public class TargetSelector : MonoBehaviour
             index < BattleManager.Instance.enemies.Count)
         {
             EnemyCharacter enemy = BattleManager.Instance.enemies[index];
-            if (enemy != null && enemy.GetCurrentHP() > 0)
+            if (enemy != null && enemy.GetCurrentHP() > 0 && !enemy.HasStealth())
             {
                 SelectEnemy(enemy);
             }
@@ -293,13 +304,13 @@ public class TargetSelector : MonoBehaviour
         int currentIndex = BattleManager.Instance.enemies.IndexOf(currentSelectedEnemy);
         if (currentIndex < 0) currentIndex = 0;
 
-        // Tìm enemy tiếp theo còn sống
+        // Tìm enemy tiếp theo còn sống và không có Stealth
         for (int i = 1; i <= BattleManager.Instance.enemies.Count; i++)
         {
             int checkIndex = (currentIndex + i) % BattleManager.Instance.enemies.Count;
             EnemyCharacter enemy = BattleManager.Instance.enemies[checkIndex];
 
-            if (enemy != null && enemy.GetCurrentHP() > 0)
+            if (enemy != null && enemy.GetCurrentHP() > 0 && !enemy.HasStealth())
             {
                 SelectEnemy(enemy);
                 return;
