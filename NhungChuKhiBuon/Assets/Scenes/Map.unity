@@ -833,8 +833,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1415200946}
   m_HandleRect: {fileID: 1415200945}
   m_Direction: 0
-  m_Value: -0.000006357764
-  m_Size: 0.9950248
+  m_Value: 0
+  m_Size: 0.99502486
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -951,7 +951,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6136283380028684952, guid: 9268d65fd7869e243a7a1b0edd89c095, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0.000030518
+      value: 0.000030393712
       objectReference: {fileID: 0}
     - target: {fileID: 6136283380028684952, guid: 9268d65fd7869e243a7a1b0edd89c095, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1071,11 +1071,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8204957587288541859, guid: 9268d65fd7869e243a7a1b0edd89c095, type: 3}
       propertyPath: nodeTypes.Array.data[0].sceneName
-      value: BossScene
+      value: BattleScene
       objectReference: {fileID: 0}
     - target: {fileID: 8204957587288541859, guid: 9268d65fd7869e243a7a1b0edd89c095, type: 3}
       propertyPath: nodeTypes.Array.data[1].sceneName
-      value: Arena
+      value: Hospital
       objectReference: {fileID: 0}
     - target: {fileID: 8204957587288541859, guid: 9268d65fd7869e243a7a1b0edd89c095, type: 3}
       propertyPath: nodeTypes.Array.data[2].sceneName

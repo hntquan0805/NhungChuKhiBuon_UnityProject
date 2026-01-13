@@ -8,6 +8,7 @@ public class HospitalManager : MonoBehaviour
     public TMP_Text coinText;
     public UnityEngine.UI.Button healButton;
     public UnityEngine.UI.Button reviveButton;
+    public UnityEngine.UI.Button exitButton;
 
     [Header("Display")]
     public RestAreaTeamDisplay teamDisplay;
@@ -23,6 +24,7 @@ public class HospitalManager : MonoBehaviour
 
         healButton.onClick.AddListener(HealLowestHero);
         reviveButton.onClick.AddListener(ReviveHero);
+        exitButton.onClick.AddListener(ExitHospital);
 
         PersistentTeamManager.Instance?.LogTeamStatus();
     }
@@ -30,6 +32,12 @@ public class HospitalManager : MonoBehaviour
     // ===== HEAL HERO (GIỐNG REST AREA) =====
     public void HealLowestHero()
     {
+        // Phát âm thanh click
+        if (AudioHospitalManager.Instance != null)
+        {
+            AudioHospitalManager.Instance.PlayButtonClick();
+        }
+
         var team = PersistentTeamManager.Instance;
         if (team == null)
         {
@@ -41,6 +49,12 @@ public class HospitalManager : MonoBehaviour
         if (hero == null)
         {
             Debug.Log("[Hospital] No hero found to heal");
+
+            // Phát âm thanh lỗi
+            if (AudioHospitalManager.Instance != null)
+            {
+                AudioHospitalManager.Instance.PlayLose();
+            }
             return;
         }
 
@@ -50,6 +64,12 @@ public class HospitalManager : MonoBehaviour
         if (!SpendCoins(healCost))
         {
             Debug.LogWarning("[Hospital] Not enough coins!");
+
+            // Phát âm thanh không đủ tiền
+            if (AudioHospitalManager.Instance != null)
+            {
+                AudioHospitalManager.Instance.PlayLose();
+            }
             return;
         }
 
@@ -58,6 +78,12 @@ public class HospitalManager : MonoBehaviour
         hero.currentHP = Mathf.Min(hero.currentHP + healAmount, hero.maxHP);
 
         Debug.Log($"[Hospital] HP After Calc: {hero.currentHP}. (Gained: {hero.currentHP - oldHP})");
+
+        // Phát âm thanh hồi máu thành công
+        if (AudioHospitalManager.Instance != null)
+        {
+            AudioHospitalManager.Instance.PlayHeal();
+        }
 
         // REFRESH HIỂN THỊ
         try
@@ -74,6 +100,12 @@ public class HospitalManager : MonoBehaviour
     // ===== REVIVE HERO CHẾT =====
     public void ReviveHero()
     {
+        // Phát âm thanh click
+        if (AudioHospitalManager.Instance != null)
+        {
+            AudioHospitalManager.Instance.PlayButtonClick();
+        }
+
         var team = PersistentTeamManager.Instance;
         if (team == null) return;
 
@@ -81,12 +113,33 @@ public class HospitalManager : MonoBehaviour
         if (deadHero == null)
         {
             Debug.Log("[Hospital] No dead hero to revive");
+
+            // Phát âm thanh lỗi
+            if (AudioHospitalManager.Instance != null)
+            {
+                AudioHospitalManager.Instance.PlayLose();
+            }
             return;
         }
 
-        if (!SpendCoins(reviveCost)) return;
+        if (!SpendCoins(reviveCost))
+        {
+            // Phát âm thanh không đủ tiền
+            if (AudioHospitalManager.Instance != null)
+            {
+                AudioHospitalManager.Instance.PlayLose();
+            }
+            return;
+        }
 
         deadHero.currentHP = 1; // 🔥 HP = 1 khi hồi sinh
+
+        // Phát âm thanh hồi sinh thành công
+        if (AudioHospitalManager.Instance != null)
+        {
+            AudioHospitalManager.Instance.PlayRevive();
+        }
+
         Refresh();
 
         Debug.Log($"[Hospital] Revived {deadHero.heroName}");
@@ -153,6 +206,12 @@ public class HospitalManager : MonoBehaviour
 
     public void ExitHospital()
     {
-        SceneManager.LoadScene("Menu");
+        // Phát âm thanh click khi thoát
+        if (AudioHospitalManager.Instance != null)
+        {
+            AudioHospitalManager.Instance.PlayButtonClick();
+        }
+
+        SceneManager.LoadScene("Map");
     }
 }

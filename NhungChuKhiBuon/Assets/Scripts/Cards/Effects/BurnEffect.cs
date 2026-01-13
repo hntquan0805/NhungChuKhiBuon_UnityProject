@@ -31,6 +31,13 @@ public class BurnEffect : CardEffect
             return;
         }
 
+        // ===== TRACKING ATTACKER CHO BOSS =====
+        BossEnemyLevel1 boss = enemy as BossEnemyLevel1;
+        if (boss != null)
+        {
+            boss.SetLastAttacker(player);
+        }
+
         // Tính damage dựa trên ATK của player
         int playerATK = player.GetATK();
         int baseDamage = Mathf.RoundToInt(playerATK * damagePercent / 100f);

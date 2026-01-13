@@ -11,17 +11,13 @@ public enum CasinoCardType
     Type6 = 5
 }
 
+[RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(BoxCollider2D))]
 public class CasinoCards : MonoBehaviour
 {
     [Header("Card Data")]
     public CasinoCardType cardType;
     public bool isRevealed = false;
-    public bool isPlayerCard = false;
-    public bool isDiscarded = false;
-    public bool isSelected = false;
-
-    [Header("Visual")]
-    public Color selectedColor = Color.cyan;
 
     [Header("Sprites")]
     public Sprite cardFrontSprite;
@@ -40,33 +36,25 @@ public class CasinoCards : MonoBehaviour
         boxCollider = GetComponent<BoxCollider2D>();
     }
 
-    public void Initialize(CasinoCardType type, Sprite frontSprite, Sprite backSprite, bool isPlayer)
+    /// <summary>
+    /// Khởi tạo lá bài – LUÔN ÚP
+    /// </summary>
+    public void Initialize(CasinoCardType type, Sprite frontSprite, Sprite backSprite)
     {
         cardType = type;
         cardFrontSprite = frontSprite;
         cardBackSprite = backSprite;
-        isPlayerCard = isPlayer;
+
+        isRevealed = false;
+        isFlipping = false;
+
+        spriteRenderer.sprite = cardBackSprite;
+        spriteRenderer.color = Color.white;
 
         transform.localScale = new Vector3(0.75f, 0.75f, 1f);
 
-        if (isPlayerCard)
-        {
-            isRevealed = true;
-            spriteRenderer.sprite = cardFrontSprite;
-        }
-        else
-        {
-            isRevealed = false;
-            spriteRenderer.sprite = cardBackSprite;
-        }
-
-
         if (boxCollider != null)
-        {
             boxCollider.enabled = true;
-        }
-
-        UpdateCardColor();
     }
 
     /* =========================
@@ -76,16 +64,17 @@ public class CasinoCards : MonoBehaviour
     public void Reveal()
     {
         if (isRevealed || isFlipping) return;
-        StartCoroutine(FlipCoroutine(true));
+
+        // Phát âm thanh lật bài
+        if (AudioCasinoManager.Instance != null)
+        {
+            AudioCasinoManager.Instance.PlayCardFlip();
+        }
+
+        StartCoroutine(FlipCoroutine());
     }
 
-    public void HideCard()
-    {
-        if (!isRevealed || isFlipping) return;
-        StartCoroutine(FlipCoroutine(false));
-    }
-
-    IEnumerator FlipCoroutine(bool reveal)
+    IEnumerator FlipCoroutine()
     {
         isFlipping = true;
         boxCollider.enabled = false;
@@ -104,17 +93,9 @@ public class CasinoCards : MonoBehaviour
 
         transform.localScale = new Vector3(0f, originalScale.y, originalScale.z);
 
-        // Đổi sprite
-        if (reveal)
-        {
-            spriteRenderer.sprite = cardFrontSprite;
-            isRevealed = true;
-        }
-        else
-        {
-            spriteRenderer.sprite = cardBackSprite;
-            isRevealed = false;
-        }
+        // Đổi sprite sang mặt trước
+        spriteRenderer.sprite = cardFrontSprite;
+        isRevealed = true;
 
         // Mở lại
         time = 0f;
@@ -129,71 +110,20 @@ public class CasinoCards : MonoBehaviour
         transform.localScale = originalScale;
 
         isFlipping = false;
-        boxCollider.enabled = true;
     }
 
     /* =========================
-       INTERACTION & VISUAL
+       INTERACTION
        ========================= */
-
-    public void SetInteractable(bool interactable)
-    {
-        if (boxCollider != null)
-            boxCollider.enabled = interactable;
-    }
-
-    public void UpdateCardColor()
-    {
-        if (isDiscarded)
-        {
-            spriteRenderer.color = Color.gray;
-        }
-        else if (isSelected)
-        {
-            spriteRenderer.color = selectedColor;
-        }
-        else
-        {
-            spriteRenderer.color = Color.white;
-        }
-    }
 
     void OnMouseDown()
     {
-        if (isFlipping) return;
+        if (isFlipping || isRevealed) return;
 
-        if (!isRevealed)
+        CasinoMangaer manager = FindFirstObjectByType<CasinoMangaer>();
+        if (manager != null)
         {
-            Debug.Log("Card chưa được mở!");
-            return;
-        }
-
-        if (isDiscarded)
-        {
-            Debug.Log("Card đã bị bỏ!");
-            return;
-        }
-
-        CasinoMangaer gameManager = FindFirstObjectByType<CasinoMangaer>();
-        if (gameManager != null)
-        {
-            gameManager.OnCardClicked(this);
-        }
-    }
-
-    void OnMouseEnter()
-    {
-        if (isRevealed && !isDiscarded && !isSelected && !isFlipping)
-        {
-            spriteRenderer.color = new Color(0.9f, 0.9f, 0.9f);
-        }
-    }
-
-    void OnMouseExit()
-    {
-        if (!isSelected)
-        {
-            UpdateCardColor();
+            manager.OnCardClicked(this);
         }
     }
 }

@@ -308,15 +308,9 @@ MonoBehaviour:
   - {fileID: 21300000, guid: b35a4ee1c42290c4caced85635969ac8, type: 3}
   cardBackSprite: {fileID: 21300000, guid: 46950085a427489488c11e225031b597, type: 3}
   cardContainer: {fileID: 1185172860}
-  revealButton: {fileID: 1376330104}
-  discardButton: {fileID: 1211962910}
-  swapButton: {fileID: 225833808}
-  endButton: {fileID: 736130139}
   betAmountText: {fileID: 1163470534}
   coinText: {fileID: 170704811}
   messageText: {fileID: 1700275570}
-  discardCost: 500
-  swapCost: 300
 --- !u!4 &103383462
 Transform:
   m_ObjectHideFlags: 0
@@ -2980,6 +2974,60 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2061738163}
   m_CullTransparentMesh: 1
+--- !u!1 &2107696908
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2107696910}
+  - component: {fileID: 2107696909}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2107696909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107696908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 955abd7311b08174a83da118fd7c1193, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioCasinoManager
+  musicSource: {fileID: 0}
+  sfxSource: {fileID: 0}
+  sceneMusic: {fileID: 8300000, guid: a7a27b109ff529e4b94a3d39d1af1b51, type: 3}
+  buttonClickSFX: {fileID: 8300000, guid: fa2b98c97800d4e4aa2acb29de345d63, type: 3}
+  cardFlipSFX: {fileID: 8300000, guid: fb6aff910ae330141a07a77e8b75aa0c, type: 3}
+  winSFX: {fileID: 8300000, guid: 5bffa486e1c60eb47826ae64019f8cd8, type: 3}
+  loseSFX: {fileID: 8300000, guid: a9d76908f188562409f97c7ad168eeb1, type: 3}
+  bigWinSFX: {fileID: 8300000, guid: 74693c86d5bd1d8469c1245a318e0b11, type: 3}
+  musicVolume: 0.5
+  sfxVolume: 0.7
+--- !u!4 &2107696910
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107696908}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 781.8102, y: 523.3327, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2990,3 +3038,4 @@ SceneRoots:
   - {fileID: 103383462}
   - {fileID: 2014709743}
   - {fileID: 1185172860}
+  - {fileID: 2107696910}

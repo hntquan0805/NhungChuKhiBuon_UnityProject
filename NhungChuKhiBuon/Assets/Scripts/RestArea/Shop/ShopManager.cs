@@ -41,6 +41,12 @@ public class ShopManager : MonoBehaviour
 
     void OpenShop()
     {
+        // Phát âm thanh mở shop
+        if (AudioRestAreaManager.Instance != null)
+        {
+            AudioRestAreaManager.Instance.PlayButtonClick();
+        }
+
         shopPanel.SetActive(true);
         if (!shopGenerated)
         {
@@ -51,11 +57,23 @@ public class ShopManager : MonoBehaviour
 
     void CloseShop()
     {
+        // Phát âm thanh đóng shop
+        if (AudioRestAreaManager.Instance != null)
+        {
+            AudioRestAreaManager.Instance.PlayButtonClick();
+        }
+
         shopPanel.SetActive(false);
     }
 
     void RefreshShop()
     {
+        // Phát âm thanh refresh
+        if (AudioRestAreaManager.Instance != null)
+        {
+            AudioRestAreaManager.Instance.PlayButtonClick();
+        }
+
         Debug.Log("Refresh shop");
         GenerateShopItems();
     }

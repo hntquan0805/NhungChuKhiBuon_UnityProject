@@ -175,8 +175,9 @@ public class EnemyCharacter : CharacterBase
             animator.SetTrigger("Attack");
     }
 
-    public void DealDamage()
+    public virtual void DealDamage()
     {
+        Debug.Log($"[EnemyCharacter] DealDamage called for {gameObject.name}");
         if (targetTeam == null)
         {
             return;

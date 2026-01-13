@@ -11,6 +11,8 @@ public class PlayerCharacter : CharacterBase
     // Buff system
     private List<BuffInstance> buffs = new List<BuffInstance>();
 
+    private List<DebuffInstance> debuffs = new List<DebuffInstance>();
+
     [Header("Audio")]
     private AudioSource audioSource;
 
@@ -297,6 +299,12 @@ public class PlayerCharacter : CharacterBase
             {
                 buffManager.UpdateBuffUI();
             }
+
+            TeamDebuffManager debuffManager = team.GetComponent<TeamDebuffManager>();
+            if (debuffManager != null)
+            {
+                debuffManager.UpdateDebuffUI();
+            }
         }
     }
     
@@ -306,8 +314,135 @@ public class PlayerCharacter : CharacterBase
         UpdateTeamBuffUI();
     }
 
+
+    // ========== DEBUFF SYSTEM - SỬ DỤNG LẠI DebuffInstance ==========
+
+    // Overload cho Enemy gây debuff
+    public void AddDebuff(DebuffType type, int stacks, EnemyCharacter source, Sprite icon = null)
+    {
+        if (type == DebuffType.DecreaseAttack || type == DebuffType.Poison)
+        {
+            DebuffInstance existingDebuff = debuffs.Find(d => d.type == type);
+
+            Debug.Log($"[AddDebuff] {name} - Type: {type} | Existing: {existingDebuff != null} | Current debuffs count: {debuffs.Count}");
+
+            if (existingDebuff != null)
+            {
+                Debug.Log($"[AddDebuff] CỘNG STACK: {existingDebuff.stacks} + {stacks} = {existingDebuff.stacks + stacks}");
+                existingDebuff.AddStacks(stacks);
+            }
+            else
+            {
+                Debug.Log($"[AddDebuff] TẠO MỚI debuff {type} với {stacks} stack");
+                DebuffInstance newDebuff = new DebuffInstance(type, stacks, source, icon);
+                debuffs.Add(newDebuff);
+            }
+        }
+
+        UpdateTeamDebuffUI();
+    }
+
+    // Overload cho Player gây debuff (nếu cần)
+    public void AddDebuff(DebuffType type, int stacks, PlayerCharacter source, Sprite icon = null)
+    {
+        if (type == DebuffType.DecreaseAttack)
+        {
+            DebuffInstance existingDebuff = debuffs.Find(d => d.type == type);
+
+            if (existingDebuff != null)
+            {
+                existingDebuff.AddStacks(stacks);
+            }
+            else
+            {
+                DebuffInstance newDebuff = new DebuffInstance(type, stacks, source, icon);
+                debuffs.Add(newDebuff);
+            }
+        }
+        else
+        {
+            DebuffInstance newDebuff = new DebuffInstance(type, stacks, source, icon);
+            debuffs.Add(newDebuff);
+        }
+
+        UpdateTeamDebuffUI();
+    }
+
+    public void RemoveDebuff(DebuffType type)
+    {
+        debuffs.RemoveAll(d => d.type == type);
+        UpdateTeamDebuffUI();
+    }
+
+    public void ProcessDebuffsAtTurnStart()
+    {
+        int totalDamage = 0;
+        List<DebuffInstance> debuffsToRemove = new List<DebuffInstance>();
+        Debug.Log($"[{name}] ProcessDebuffs - Total debuffs: {debuffs.Count}");
+
+        foreach (var debuff in debuffs)
+        {
+            int damage = debuff.GetDamage();
+            Debug.Log($"[{name}] Debuff {debuff.type} - Damage: {damage}, Stacks: {debuff.stacks}");
+            if (damage > 0)
+            {
+                totalDamage += damage;
+            }
+
+            // Giảm 1 stack
+            debuff.ReduceStacks(1);
+
+            // Nếu hết stack thì đánh dấu để xóa
+            if (debuff.stacks <= 0)
+            {
+                debuffsToRemove.Add(debuff);
+            }
+        }
+
+        // Xóa các debuff đã hết stack
+        foreach (var debuff in debuffsToRemove)
+        {
+            debuffs.Remove(debuff);
+        }
+        Debug.Log($"[{name}] Total damage from debuffs: {totalDamage}");
+        // Gây damage
+        if (totalDamage > 0)
+        {
+            TakeDamage(totalDamage);
+        }
+
+        // Update UI
+        UpdateTeamDebuffUI();
+    }
+
+    public List<DebuffInstance> GetDebuffs()
+    {
+        return debuffs;
+    }
+
+    private void UpdateTeamDebuffUI()
+    {
+        // Gọi team debuff manager để update UI
+        PlayerTeam team = FindObjectOfType<PlayerTeam>();
+        if (team != null)
+        {
+            TeamDebuffManager debuffManager = team.GetComponent<TeamDebuffManager>();
+            if (debuffManager != null)
+            {
+                debuffManager.UpdateDebuffUI();
+            }
+        }
+    }
+
+    public void ClearDebuffs()
+    {
+        debuffs.Clear();
+        UpdateTeamDebuffUI();
+    }
+
+
     // ========== AUDIO SYSTEM ==========
-    
+
     private void PlaySound(AudioClip clip)
     {
         if (audioSource != null && clip != null)
