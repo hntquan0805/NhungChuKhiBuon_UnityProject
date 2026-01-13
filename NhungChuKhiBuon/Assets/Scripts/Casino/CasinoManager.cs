@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
-using System.Linq;
 
 public class CasinoMangaer : MonoBehaviour
 {
@@ -12,93 +10,55 @@ public class CasinoMangaer : MonoBehaviour
     public Sprite cardBackSprite;
     public Transform cardContainer;
 
-    [Header("UI Elements")]
-    public Button revealButton;
-    public Button discardButton;
-    public Button swapButton; // NÚT MỚI
-    public Button endButton;
+    [Header("UI")]
     public TextMeshProUGUI betAmountText;
     public TextMeshProUGUI coinText;
     public TextMeshProUGUI messageText;
 
-    private List<CasinoCards> allCards = new List<CasinoCards>();
-    private CasinoCards selectedCardToDiscard = null;
-    private CasinoCards selectedCardToSwap = null; // BIẾN MỚI
-    private bool hasDiscarded = false;
-    private bool hasSwapped = false; // BIẾN MỚI
-    public int discardCost = 500;
-    public int swapCost = 300; // CHI PHÍ ĐỔI BÀI
+    private List<CasinoCards> cards = new List<CasinoCards>();
+    private bool hasChosen = false;
 
     void Start()
     {
         SetupGame();
         UpdateUI();
-
-        revealButton.onClick.AddListener(OnRevealButtonClicked);
-        discardButton.onClick.AddListener(OnDiscardButtonClicked);
-        swapButton.onClick.AddListener(OnSwapButtonClicked); // THÊM LISTENER
-        endButton.onClick.AddListener(OnEndButtonClicked);
-
-        SetButtonState(discardButton, false);
-        SetButtonState(swapButton, false);
     }
 
     void SetupGame()
     {
-        // Tạo 6 lá bài
         CasinoCardType[] cardTypes = GenerateRandomCards();
 
-        // VỊ TRÍ 4 LÁ ÚP (Ở GIỮA MÀN HÌNH)
-        Vector3[] hiddenCardPositions = new Vector3[]
+        Vector3[] positions =
         {
-            new Vector3(-9f, 2.5f, 0),   // Lá úp 1
-            new Vector3(-3f, 2.5f, 0),   // Lá úp 2
-            new Vector3(3f, 2.5f, 0),    // Lá úp 3
-            new Vector3(9f, 2.5f, 0)     // Lá úp 4
+            new Vector3(-9f, 0f, 0),
+            new Vector3(-5f, 0f, 0),
+            new Vector3(-1f, 0f, 0),
+            new Vector3(3f, 0f, 0),
+            new Vector3(7f, 0f, 0),
+            new Vector3(11f, 0f, 0),
         };
-
-        // VỊ TRÍ 2 LÁ NGƯỜI CHƠI (Ở DƯỚI MÀN HÌNH)
-        Vector3[] playerCardPositions = new Vector3[]
-        {
-            new Vector3(-3f, -4.5f, 0),  // Lá người chơi 1
-            new Vector3(3f, -4.5f, 0)    // Lá người chơi 2
-        };
-
-        int hiddenIndex = 0;
-        int playerIndex = 0;
 
         for (int i = 0; i < 6; i++)
         {
-            GameObject cardObj = Instantiate(cardPrefab, cardContainer);
+            GameObject obj = Instantiate(cardPrefab, cardContainer);
+            obj.transform.position = positions[i];
 
-            CasinoCards card = cardObj.GetComponent<CasinoCards>();
-            bool isPlayerCard = i < 2; // 2 lá đầu là của người chơi
+            CasinoCards card = obj.GetComponent<CasinoCards>();
+            card.Initialize(cardTypes[i], cardSprites[(int)cardTypes[i]], cardBackSprite);
 
-            // Đặt vị trí tùy theo loại bài
-            if (isPlayerCard)
-            {
-                cardObj.transform.position = playerCardPositions[playerIndex];
-                playerIndex++;
-            }
-            else
-            {
-                cardObj.transform.position = hiddenCardPositions[hiddenIndex];
-                hiddenIndex++;
-            }
-
-            card.Initialize(cardTypes[i], cardSprites[(int)cardTypes[i]], cardBackSprite, isPlayerCard);
-            allCards.Add(card);
+            cards.Add(card);
         }
+
+        messageText.text = "Chọn 1 lá bài!";
     }
 
     CasinoCardType[] GenerateRandomCards()
     {
-        CasinoCardType[] cards = new CasinoCardType[6];
+        CasinoCardType[] result = new CasinoCardType[6];
         for (int i = 0; i < 6; i++)
-        {
-            cards[i] = (CasinoCardType)Random.Range(0, 6);
-        }
-        return cards;
+            result[i] = (CasinoCardType)Random.Range(0, cardSprites.Length);
+
+        return result;
     }
 
     void UpdateUI()
@@ -107,256 +67,103 @@ public class CasinoMangaer : MonoBehaviour
         coinText.text = $"Coin: {MenuManager.Instance.PlayerCoins}";
     }
 
-    public void OnRevealButtonClicked()
-    {
-        // Tìm lá bài úp đầu tiên
-        CasinoCards cardToReveal = allCards.FirstOrDefault(c => !c.isRevealed && !c.isPlayerCard);
-
-        if (cardToReveal != null)
-        {
-            cardToReveal.Reveal();
-            messageText.text = "Đã mở bài.";
-        }
-        else
-        {
-            messageText.text = "Không còn bài để mở!";
-        }
-    }
-
+    // Được gọi từ CasinoCards.OnMouseDown()
     public void OnCardClicked(CasinoCards card)
     {
-        if (!card.isRevealed || card.isDiscarded)
-        {
-            return;
-        }
+        if (hasChosen) return;
 
-        // Nếu click vào lá đang được chọn -> bỏ chọn
-        if (selectedCardToSwap == card || selectedCardToDiscard == card)
-        {
-            card.isSelected = false;
-            card.UpdateCardColor();
+        hasChosen = true;
+        card.Reveal();
 
-            selectedCardToSwap = null;
-            selectedCardToDiscard = null;
-            SetButtonState(swapButton, false);
-            SetButtonState(discardButton, false);
-
-            Debug.Log("Bỏ chọn card");
-            return;
-        }
-
-        // Bỏ chọn lá cũ (nếu có)
-        if (selectedCardToSwap != null)
-        {
-            selectedCardToSwap.isSelected = false;
-            selectedCardToSwap.UpdateCardColor();
-        }
-        if (selectedCardToDiscard != null)
-        {
-            selectedCardToDiscard.isSelected = false;
-            selectedCardToDiscard.UpdateCardColor();
-        }
-
-        // Chọn lá mới
-        card.isSelected = true;
-        card.selectedColor = Color.cyan;
-        card.UpdateCardColor();
-
-        // Gán cho cả 2 biến (để cả 2 nút đều biết lá nào được chọn)
-        selectedCardToSwap = card;
-        selectedCardToDiscard = card;
-
-        // Bật các nút tùy theo chức năng nào chưa dùng
-        SetButtonState(swapButton, !hasSwapped);
-        SetButtonState(discardButton, !hasDiscarded);
-
-        Debug.Log($"Chọn card - Swap available: {!hasSwapped}, Discard available: {!hasDiscarded}");
+        // Delay để đợi animation lật bài hoàn thành trước khi phát âm thanh kết quả
+        Invoke(nameof(DelayedResolve), 0.5f);
+        currentCardType = card.cardType;
     }
 
-    public void OnDiscardButtonClicked()
+    private CasinoCardType currentCardType;
+
+    void DelayedResolve()
     {
-        if (!hasDiscarded && selectedCardToDiscard != null)
+        ResolveResult(currentCardType);
+    }
+
+    void ResolveResult(CasinoCardType type)
+    {
+        int bet = MenuManager.Instance.CurrentBet;
+        int reward = 0;
+        string msg = "";
+        bool isWin = false;
+        bool isBigWin = false;
+
+        switch (type)
         {
-            if (MenuManager.Instance.SpendCoins(discardCost))
+            case CasinoCardType.Type1:
+                reward = 0;
+                msg = "Mất toàn bộ cược!";
+                isWin = false;
+                break;
+
+            case CasinoCardType.Type2:
+                reward = bet / 2;
+                msg = "Mất một nửa cược!";
+                isWin = false;
+                break;
+
+            case CasinoCardType.Type3:
+                reward = bet;
+                msg = "Hoàn tiền!";
+                isWin = true;
+                break;
+
+            case CasinoCardType.Type4:
+                reward = bet * 2;
+                msg = "Thắng x2!";
+                isWin = true;
+                break;
+
+            case CasinoCardType.Type5:
+                reward = bet * 5;
+                msg = "Thắng x5!";
+                isWin = true;
+                isBigWin = true;
+                break;
+
+            case CasinoCardType.Type6:
+                reward = bet * 10;
+                msg = "Thắng x10!!!";
+                isWin = true;
+                isBigWin = true;
+                break;
+        }
+
+        // Phát âm thanh dựa trên kết quả
+        if (AudioCasinoManager.Instance != null)
+        {
+            if (isBigWin)
             {
-                selectedCardToDiscard.isDiscarded = true;
-                selectedCardToDiscard.isSelected = false;
-                selectedCardToDiscard.UpdateCardColor();
-
-                hasDiscarded = true;
-                SetButtonState(discardButton, false);
-
-                // Reset selection
-                selectedCardToDiscard = null;
-                selectedCardToSwap = null;
-                SetButtonState(swapButton, false);
-
-                messageText.text = $"Đã bỏ bài! Trừ {discardCost} coin.";
-                UpdateUI();
+                AudioCasinoManager.Instance.PlayBigWin();
+            }
+            else if (isWin)
+            {
+                AudioCasinoManager.Instance.PlayWin();
             }
             else
             {
-                messageText.text = "Không đủ coin để bỏ bài!";
-            }
-        }
-    }
-
-    // HÀM MỚI: XỬ LÝ ĐỔI BÀI
-    public void OnSwapButtonClicked()
-    {
-        if (!hasSwapped && selectedCardToSwap != null)
-        {
-            if (MenuManager.Instance.SpendCoins(swapCost))
-            {
-                CasinoCardType oldType = selectedCardToSwap.cardType;
-                CasinoCardType newType;
-
-                // Tạo loại bài mới khác với loại hiện tại
-                do
-                {
-                    newType = (CasinoCardType)Random.Range(0, 6);
-                } while (newType == oldType);
-
-                // Cập nhật lá bài
-                selectedCardToSwap.cardType = newType;
-                selectedCardToSwap.GetComponent<SpriteRenderer>().sprite = cardSprites[(int)newType];
-                selectedCardToSwap.isSelected = false;
-                selectedCardToSwap.UpdateCardColor();
-
-                hasSwapped = true;
-                hasDiscarded = true;
-                SetButtonState(swapButton, false);
-                SetButtonState(discardButton, false);
-
-                if (selectedCardToSwap != null)
-                {
-                    selectedCardToSwap.isSelected = false;
-                    selectedCardToSwap.UpdateCardColor();
-                }
-
-                // Reset selection
-                selectedCardToSwap = null;
-                selectedCardToDiscard = null;
-
-
-                messageText.text = $"Đã đổi bài! Trừ {swapCost} coin.";
-                UpdateUI();
-            }
-            else
-            {
-                messageText.text = "Không đủ coin để đổi bài!";
-            }
-        }
-    }
-
-    public void OnEndButtonClicked()
-    {
-        CalculateResult();
-    }
-
-    void CalculateResult()
-    {
-        // Lấy tất cả lá đã mở và không bị bỏ
-        List<CasinoCards> activeCards = allCards.Where(c => c.isRevealed && !c.isDiscarded).ToList();
-
-        int totalCards = activeCards.Count;
-        int multiplier = 0;
-        string resultMessage = "";
-
-        // Trường hợp đặc biệt: Chỉ còn 1 lá
-        if (totalCards == 1)
-        {
-            int returnAmount = Mathf.FloorToInt(MenuManager.Instance.CurrentBet * 0.2f);
-            MenuManager.Instance.AddCoins(returnAmount);
-            messageText.text = $"Chỉ còn 1 lá! Hoàn lại 20%: {returnAmount} coin.";
-            UpdateUI();
-            Invoke("ReturnToBetting", 3f);
-            return;
-        }
-
-        // Đếm số lượng từng loại bài
-        Dictionary<CasinoCardType, int> cardCounts = new Dictionary<CasinoCardType, int>();
-        foreach (CasinoCards card in activeCards)
-        {
-            if (!cardCounts.ContainsKey(card.cardType))
-                cardCounts[card.cardType] = 0;
-            cardCounts[card.cardType]++;
-        }
-
-        // Kiểm tra có lá lẻ không (nhiều hơn 1 loại bài)
-        if (cardCounts.Count > 1)
-        {
-            multiplier = 0;
-            resultMessage = "Có lá khác biệt! Mất toàn bộ cược!";
-        }
-        else
-        {
-            // Tất cả các lá giống nhau
-            int matchingCards = cardCounts.First().Value;
-
-            switch (matchingCards)
-            {
-                case 2:
-                    multiplier = 2;
-                    resultMessage = "2 lá giống nhau! x2";
-                    break;
-                case 3:
-                    multiplier = 5;
-                    resultMessage = "3 lá giống nhau! x5";
-                    break;
-                case 4:
-                    multiplier = 10;
-                    resultMessage = "4 lá giống nhau! x10";
-                    break;
-                case 5:
-                    multiplier = 20;
-                    resultMessage = "5 lá giống nhau! x20";
-                    break;
-                case 6:
-                    multiplier = 50;
-                    resultMessage = "6 lá giống nhau! x50";
-                    break;
+                AudioCasinoManager.Instance.PlayLose();
             }
         }
 
-        int winAmount = MenuManager.Instance.CurrentBet * multiplier;
+        if (reward > 0)
+            MenuManager.Instance.AddCoins(reward);
 
-        if (multiplier > 0)
-        {
-            MenuManager.Instance.AddCoins(winAmount);
-            messageText.text = $"{resultMessage}\nThắng: {winAmount} coin!";
-        }
-        else
-        {
-            messageText.text = $"{resultMessage}\nMất: {MenuManager.Instance.CurrentBet} coin!";
-        }
-
+        messageText.text = msg + $"\nNhận: {reward} coin";
         UpdateUI();
 
-        // Quay lại betting scene sau 3 giây
-        Invoke("ReturnToBetting", 3f);
+        Invoke(nameof(ReturnToMap), 3f);
     }
 
-    void ReturnToBetting()
+    void ReturnToMap()
     {
         MenuManager.Instance.LoadScene("Map");
     }
-    void SetButtonState(Button btn, bool enable)
-    {
-        btn.interactable = enable;
-
-        // Lấy Canvas Group từ Button
-        CanvasGroup group = btn.GetComponent<CanvasGroup>();
-
-        if (group != null)
-        {
-            // Nếu enable thì hiện rõ (1), nếu disable thì mờ đi (ví dụ 0.5)
-            group.alpha = enable ? 1f : 0.5f;
-
-            // Chặn hoặc cho phép tương tác chuột
-            group.interactable = enable;
-            group.blocksRaycasts = enable;
-        }
-    }
-
 }

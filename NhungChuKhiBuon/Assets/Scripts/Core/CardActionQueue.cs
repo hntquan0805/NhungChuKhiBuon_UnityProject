@@ -114,6 +114,8 @@ public class CardActionQueue : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
 
         // Deal damage
+        Debug.Log($"[CardActionQueue] Calling DealDamage() on {enemy.name}");
+        Debug.Log(enemy.GetType().FullName);
         enemy.DealDamage();
 
         // Đợi animation hurt

@@ -70,7 +70,19 @@ public class ShopItemSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         if (!success)
         {
             Debug.Log("Not enough coins");
+
+            // Phát âm thanh không đủ tiền
+            if (AudioRestAreaManager.Instance != null)
+            {
+                AudioRestAreaManager.Instance.PlayError();
+            }
             return;
+        }
+
+        // Phát âm thanh mua thành công
+        if (AudioRestAreaManager.Instance != null)
+        {
+            AudioRestAreaManager.Instance.PlayPurchase();
         }
 
         // Add ĐÚNG item đã xem stat

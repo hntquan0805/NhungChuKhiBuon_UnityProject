@@ -25,6 +25,13 @@ public class AttackHpScaleEffect : CardEffect
             return;
         }
 
+        // ===== TRACKING ATTACKER CHO BOSS =====
+        BossEnemyLevel1 boss = enemy as BossEnemyLevel1;
+        if (boss != null)
+        {
+            boss.SetLastAttacker(player);
+        }
+
         // Tính damage dựa trên MaxHP của player
         int playerMaxHP = player.GetMaxHP();
         int calculatedDamage = Mathf.RoundToInt(playerMaxHP * damagePercent / 100f) + fixedDamage;

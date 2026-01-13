@@ -148,6 +148,17 @@ public class BattleManager : MonoBehaviour
             enemiesInterrupted.Add(enemy);
         }
 
+        if (playerTeam != null)
+        {
+            foreach (var player in playerTeam.players)
+            {
+                if (player != null && player.GetCurrentHP() > 0)
+                {
+                    player.ProcessDebuffsAtTurnStart();
+                }
+            }
+        }
+
         if (CardActionQueue.Instance != null)
         {
             CardActionQueue.Instance.ClearQueue();

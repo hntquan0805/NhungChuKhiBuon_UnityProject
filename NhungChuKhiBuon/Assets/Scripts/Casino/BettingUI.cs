@@ -37,6 +37,12 @@ public class BettingUI : MonoBehaviour
 
     void SelectBet(int amount)
     {
+        // Phát âm thanh khi bấm nút
+        if (AudioCasinoManager.Instance != null)
+        {
+            AudioCasinoManager.Instance.PlayButtonClick();
+        }
+
         if (amount <= MenuManager.Instance.PlayerCoins)
         {
             MenuManager.Instance.CurrentBet = amount;
@@ -46,7 +52,21 @@ public class BettingUI : MonoBehaviour
         else
         {
             Debug.Log("Không đủ coin!");
-            // Có thể thêm thông báo lỗi UI ở đây
+
+            // Phát âm thanh lỗi
+            if (AudioCasinoManager.Instance != null)
+            {
+                AudioCasinoManager.Instance.PlayLose();
+            }
+
+            // Thông báo lỗi UI
+            questionText.text = "Không đủ coin! Hãy chọn mức khác.";
+            Invoke(nameof(ResetQuestionText), 2f);
         }
+    }
+
+    void ResetQuestionText()
+    {
+        questionText.text = "Hãy chọn mức cược!";
     }
 }

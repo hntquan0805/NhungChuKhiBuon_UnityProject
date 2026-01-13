@@ -35,6 +35,12 @@ public class RestAreaManager : MonoBehaviour
     // ===== HEAL HERO CÓ HP THẤP NHẤT =====
     public void HealLowestHero()
     {
+        // Phát âm thanh click
+        if (AudioRestAreaManager.Instance != null)
+        {
+            AudioRestAreaManager.Instance.PlayButtonClick();
+        }
+
         var team = PersistentTeamManager.Instance;
         if (team == null)
         {
@@ -59,6 +65,12 @@ public class RestAreaManager : MonoBehaviour
         if (lowestHero == null)
         {
             Debug.Log("[RestArea] All heroes are already at full HP!");
+
+            // Phát âm thanh lỗi
+            if (AudioRestAreaManager.Instance != null)
+            {
+                AudioRestAreaManager.Instance.PlayError();
+            }
             return;
         }
 
@@ -68,6 +80,12 @@ public class RestAreaManager : MonoBehaviour
             if (!MenuManager.Instance.SpendCoins(healCost))
             {
                 Debug.LogWarning("[RestArea] Not enough coins!");
+
+                // Phát âm thanh không đủ tiền
+                if (AudioRestAreaManager.Instance != null)
+                {
+                    AudioRestAreaManager.Instance.PlayError();
+                }
                 return;
             }
         }
@@ -84,6 +102,12 @@ public class RestAreaManager : MonoBehaviour
             $"{beforeHP} → {lowestHero.currentHP} (-{healCost} coins)"
         );
 
+        // Phát âm thanh hồi máu thành công
+        if (AudioRestAreaManager.Instance != null)
+        {
+            AudioRestAreaManager.Instance.PlayHeal();
+        }
+
         UpdateCoinUI();
         RefreshTeamDisplay();
         team.LogTeamStatus();
@@ -99,6 +123,12 @@ public class RestAreaManager : MonoBehaviour
 
     public void ExitToCasino()
     {
+        // Phát âm thanh click khi thoát
+        if (AudioRestAreaManager.Instance != null)
+        {
+            AudioRestAreaManager.Instance.PlayButtonClick();
+        }
+
         if (shopManager != null)
         {
             shopManager.ResetShop();
