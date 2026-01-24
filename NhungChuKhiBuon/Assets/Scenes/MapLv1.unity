@@ -983,7 +983,7 @@ PrefabInstance:
       objectReference: {fileID: 21300000, guid: 2d39e4b8b33b5cf4b91e032b8b22d3d1, type: 3}
     - target: {fileID: 8204957587288541859, guid: 9268d65fd7869e243a7a1b0edd89c095, type: 3}
       propertyPath: bossNode.sceneName
-      value: VictoryScene
+      value: BossScene1
       objectReference: {fileID: 0}
     - target: {fileID: 8204957587288541859, guid: 9268d65fd7869e243a7a1b0edd89c095, type: 3}
       propertyPath: nodeTypes.Array.size
