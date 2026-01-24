@@ -8,6 +8,7 @@ public class MainMenu : MonoBehaviour
     public Button enterCasinoButton;
     public Button enterRestAreaButton;
     public Button hospital;
+    public Button upgradeButton;
 
     void Start()
     {
@@ -19,6 +20,9 @@ public class MainMenu : MonoBehaviour
 
         if (enterRestAreaButton != null)
             enterRestAreaButton.onClick.AddListener(EnterRestArea);
+
+        if (upgradeButton != null)
+            upgradeButton.onClick.AddListener(EnterUpgrade);
     }
 
     void EnterMap()
@@ -33,5 +37,10 @@ public class MainMenu : MonoBehaviour
     void EnterRestArea()
     {
         MenuManager.Instance.LoadScene("RestArea");
+    }
+
+    void EnterUpgrade()
+    {
+        MenuManager.Instance.LoadScene("ListUpgrade");
     }
 }

@@ -110,11 +110,24 @@ MonoBehaviour:
   maxHP: 100
   animator: {fileID: 7536167094695924574}
   stats:
-    maxHP: 850
-    atk: 500
-    def: 100
-    crit: 15
-    critDam: 150
+    baseMaxHP: 100
+    baseAtk: 50
+    baseDef: 10
+    avatarSprite: {fileID: 9104635526334807120, guid: 2a28d561df19c264eb75a32e607bc9dc, type: 3}
+    characterIcon: {fileID: 4495478712733764576, guid: 823bde0858a04fe46a482d78fbd00d18, type: 3}
+    characterName: Knight
+    baseCrit: 15
+    baseCritDam: 150
+    levelData:
+      currentLevel: 10
+      hpPerLevel: 10
+      atkPerLevel: 3
+      defPerLevel: 1
+      specialStatType: 3
+      specialStatBonus: 5
+      baseExpCost: 100
+      baseGoldCost: 50
+      costMultiplierPerLevel: 1.1
     characterClass: 1
     attackSound: {fileID: 8300000, guid: 5daa95494bfc0154b974b2a049c66afe, type: 3}
     hurtSound: {fileID: 8300000, guid: 10e8c203fda64214d84c281afe0d6477, type: 3}

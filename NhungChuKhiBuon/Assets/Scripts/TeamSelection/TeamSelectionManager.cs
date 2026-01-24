@@ -6,7 +6,6 @@ using System.Collections.Generic;
 public class TeamSelectionManager : MonoBehaviour
 {
     [Header("UI References")]
-    public Transform availableHeroesParent;
     public SlotController[] selectedSlots;
 
     [Header("Settings")]
@@ -23,12 +22,13 @@ public class TeamSelectionManager : MonoBehaviour
 
     private void Start()
     {
-        HeroAvatar[] heroes = availableHeroesParent.GetComponentsInChildren<HeroAvatar>();
-        foreach (var hero in heroes)
+        // Kiểm tra CharacterRepository đã được khởi tạo chưa
+        if (!CharacterRepository.Instance.IsInitialized())
         {
-            hero.Initialize(this);
+            Debug.LogError("[TeamSelectionManager] ⚠ CharacterRepository chưa được khởi tạo! Hãy chạy qua Menu scene trước.");
         }
 
+        // Clear tất cả slots
         foreach (var slot in selectedSlots)
         {
             if (slot != null)
@@ -41,6 +41,9 @@ public class TeamSelectionManager : MonoBehaviour
         {
             startGameButton.onClick.AddListener(OnStartGameClicked);
         }
+
+        // Lưu ý: HeroAvatar.Initialize() được gọi bởi HeroAvatarGenerator
+        // Không cần khởi tạo ở đây nữa
     }
 
     private void Update()

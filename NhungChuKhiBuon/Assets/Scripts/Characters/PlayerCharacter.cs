@@ -187,6 +187,22 @@ public class PlayerCharacter : CharacterBase
         return maxHP;
     }
 
+    /// <summary>
+    /// Refresh max HP và các stats sau khi level up.
+    /// </summary>
+    public void RefreshStatsAfterLevelUp()
+    {
+        int newMaxHP = stats.maxHP;
+        
+        // Tăng current HP theo tỉ lệ với max HP mới
+        float hpPercentage = (float)currentHP / maxHP;
+        maxHP = newMaxHP;
+        currentHP = Mathf.RoundToInt(maxHP * hpPercentage);
+        currentHP = Mathf.Clamp(currentHP, 1, maxHP);
+        
+        Debug.Log($"[{name}] Stats refreshed after level up. New MaxHP: {maxHP}, CurrentHP: {currentHP}");
+    }
+
     // ========== BUFF SYSTEM ==========
     
     public void AddBuff(BuffType type, int stacks, Sprite icon = null, int casterMaxHP = 0, float healPercent = 10f)

@@ -20,6 +20,7 @@ public class MenuManager : MonoBehaviour
     public const string REST_AREA_SCENE = "RestArea";
     public const string TEAM_SELECTION_SCENE = "TeamSelection";
     public const string HOSPITAL_SCENE = "Hospital";
+    public const string UPGRADE_SCENE = "ListUpgrade";
 
     void Awake()
     {
