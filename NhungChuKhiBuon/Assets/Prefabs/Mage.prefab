@@ -154,9 +154,9 @@ MonoBehaviour:
   maxHP: 100
   animator: {fileID: 799384656914584563}
   stats:
-    baseMaxHP: 100
-    baseAtk: 50
-    baseDef: 10
+    baseMaxHP: 500
+    baseAtk: 300
+    baseDef: 90
     avatarSprite: {fileID: 3452900601912840902, guid: 39c3527203f6b7342b96bf0fc924ea77, type: 3}
     characterIcon: {fileID: 2971653748508199937, guid: f5736aeefdbdca14cb551d169c507496, type: 3}
     characterName: Mage

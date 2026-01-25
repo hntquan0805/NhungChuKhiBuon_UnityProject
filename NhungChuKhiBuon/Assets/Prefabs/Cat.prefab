@@ -110,9 +110,9 @@ MonoBehaviour:
   maxHP: 100
   animator: {fileID: 3659902222376742771}
   stats:
-    baseMaxHP: 100
+    baseMaxHP: 850
     baseAtk: 50
-    baseDef: 10
+    baseDef: 100
     avatarSprite: {fileID: -1868124483367309023, guid: 86839d2a19d8c864c877a0fc1d21fdec, type: 3}
     characterIcon: {fileID: 1075993247170539406, guid: 6c2a9f33b45ead943acaa255b399a7f7, type: 3}
     characterName: Cat

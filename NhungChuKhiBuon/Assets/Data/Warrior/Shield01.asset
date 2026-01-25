@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a42bdfbbc9bd212479dbbe4f5bd50b88, type: 3}
+  m_Name: Shield01
+  m_EditorClassIdentifier: Assembly-CSharp::CardData
+  cardName: Shield 01
+  type: 2
+  artwork: {fileID: -4384447399200531690, guid: ab0b5373d777a344f876f2ad848e2645, type: 3}
+  effect: {fileID: 11400000, guid: bc9e332bd890446498d78e20e3ccdb52, type: 2}
+  description: "V\u1EADn s\u1EE9c buff khi\xEAn b\u1EB1ng 40% ATK."

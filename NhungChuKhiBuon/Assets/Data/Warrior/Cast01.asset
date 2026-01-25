@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a42bdfbbc9bd212479dbbe4f5bd50b88, type: 3}
+  m_Name: Cast01
+  m_EditorClassIdentifier: Assembly-CSharp::CardData
+  cardName: Cast 01
+  type: 3
+  artwork: {fileID: -3210544612508316104, guid: e566dfdba364638499fd31932b86ea9c, type: 3}
+  effect: {fileID: 11400000, guid: a9611eb079768144ca10c65360044149, type: 2}
+  description: "V\u1EADn kh\xED c\xF4ng buff Increase Attack trong m\u1ED9t l\u01B0\u1EE3t
+    v\xE0 k\xE9o nh\xE2n v\u1EADt c\xF3 ATK cao nh\u1EA5t thi tri\u1EC3n th\u1EBB
+    t\u1EA5n c\xF4ng th\u01B0\u1EDDng.\nIncrease Attack: T\u0103ng 40% gi\xE1 tr\u1ECB
+    attack"
