@@ -110,9 +110,9 @@ MonoBehaviour:
   maxHP: 100
   animator: {fileID: 7536167094695924574}
   stats:
-    baseMaxHP: 100
-    baseAtk: 50
-    baseDef: 10
+    baseMaxHP: 800
+    baseAtk: 150
+    baseDef: 200
     avatarSprite: {fileID: 9104635526334807120, guid: 2a28d561df19c264eb75a32e607bc9dc, type: 3}
     characterIcon: {fileID: 4495478712733764576, guid: 823bde0858a04fe46a482d78fbd00d18, type: 3}
     characterName: Knight
