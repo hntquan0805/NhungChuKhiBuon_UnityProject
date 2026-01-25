@@ -110,13 +110,13 @@ MonoBehaviour:
   maxHP: 100
   animator: {fileID: 7536167094695924574}
   stats:
-    baseMaxHP: 1000
-    baseAtk: 50
-    baseDef: 10
+    baseMaxHP: 500
+    baseAtk: 400
+    baseDef: 70
     avatarSprite: {fileID: 1595676714308687218, guid: d43c2bc7f3a3d0c438ea1e502d02ba64, type: 3}
     characterIcon: {fileID: 4073825398545243707, guid: e36c936a38a655a4491ff27fd35a75b7, type: 3}
     characterName: Assassin
-    baseCrit: 15
+    baseCrit: 45
     baseCritDam: 150
     levelData:
       currentLevel: 10
@@ -128,7 +128,7 @@ MonoBehaviour:
       baseExpCost: 100
       baseGoldCost: 50
       costMultiplierPerLevel: 1.1
-    characterClass: 1
+    characterClass: 4
     attackSound: {fileID: 8300000, guid: fff9571ce24f381408ee5d2b48675b50, type: 3}
     hurtSound: {fileID: 8300000, guid: 5cbc666b466775e40be85a8de513b0bc, type: 3}
     healSound: {fileID: 8300000, guid: cfdf380fdc9c183489d8765812770a56, type: 3}
