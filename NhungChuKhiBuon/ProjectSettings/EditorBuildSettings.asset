@@ -15,7 +15,7 @@ EditorBuildSettings:
     path: Assets/Scenes/TeamSelection.unity
     guid: cc154062371476d47a69b80a468908d4
   - enabled: 1
-    path: Assets/Scenes/Map.unity
+    path: Assets/Scenes/MapLv1.unity
     guid: dc92550219125804984710c4ae986f5e
   - enabled: 0
     path: Assets/Scenes/TestScene.unity
@@ -39,10 +39,10 @@ EditorBuildSettings:
     path: Assets/Scenes/Hospital.unity
     guid: 752bfbda6b6caf54c8ec3b31cd9c69f3
   - enabled: 1
-    path: Assets/Scenes/BossScene.unity
+    path: Assets/Scenes/BossScene2.unity
     guid: 66d05db9e991c7f46986db63441ff4b4
   - enabled: 1
-    path: Assets/Scenes/BossEnemyLevel1.unity
+    path: Assets/Scenes/BossScene1.unity
     guid: a09eabd6cfe075b45a15c20786ea910c
   - enabled: 1
     path: Assets/Scenes/DetailCharacter.unity
