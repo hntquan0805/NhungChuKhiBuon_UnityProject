@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/BattleScene.unity
+    path: Assets/Scenes/BattleScene01.unity
     guid: 9868d0ae33620464b9d618bedf06fed9
   - enabled: 1
     path: Assets/Scenes/VictoryScene.unity
@@ -50,6 +50,27 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ListUpgrade.unity
     guid: 50f547413cd3dc44eaf5df70ba7f065b
+  - enabled: 1
+    path: Assets/Scenes/BossScene3.unity
+    guid: ac6b2778c5d024040991705cdb5b7ee7
+  - enabled: 1
+    path: Assets/Scenes/MapLv2.unity
+    guid: 6280823956168514a8a4de9d2049e04d
+  - enabled: 1
+    path: Assets/Scenes/MapLv3.unity
+    guid: 118c82265134a89488f13e550f7d7a76
+  - enabled: 1
+    path: Assets/Scenes/MapChoose.unity
+    guid: 3713453254b36924295d9204b4b875a9
+  - enabled: 1
+    path: Assets/Scenes/BattleScene02.unity
+    guid: 51a13e90b2ec5724a97da7b27d00a07c
+  - enabled: 1
+    path: Assets/Scenes/DefeatScene.unity
+    guid: 1f67cee7061ee0547ad1ee4529735656
+  - enabled: 1
+    path: Assets/Scenes/BattleScene03.unity
+    guid: 9fd950f511598934dbb44c7598606edf
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

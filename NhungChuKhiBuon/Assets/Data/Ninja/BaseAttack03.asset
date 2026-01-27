@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a42bdfbbc9bd212479dbbe4f5bd50b88, type: 3}
-  m_Name: BasicAttack02
+  m_Name: BaseAttack03
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Basic Attack 02
+  cardName: Base Attack 03
   type: 0
   artwork: {fileID: -1083905462352544469, guid: 6759ef4cbff305a4d82d92f1fe6fbf12, type: 3}
   effect: {fileID: 11400000, guid: ddf6b27655b87854499d9c81f3e2badc, type: 2}

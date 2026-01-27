@@ -28,12 +28,17 @@ public class BattleManager : MonoBehaviour
     public string victorySceneName = "VictoryScene";
     public float delayBeforeVictory = 1.5f;
 
+    [Header("Defeat Settings")]
+    public string defeatSceneName = "DefeatScene";
+    public float delayBeforeDefeat = 1.5f;
+
     public BattleContext context;
     public TurnState state;
 
     private bool waitingForSpaceBar = false;
     private List<EnemyCharacter> enemiesInterrupted = new List<EnemyCharacter>();
     private bool isVictory = false;
+    private bool isDefeat = false;
 
     private void Awake()
     {
@@ -61,6 +66,7 @@ public class BattleManager : MonoBehaviour
     private void Update()
     {
         CheckVictoryCondition();
+        CheckDefeatCondition();
     }
 
     void InitializeEnemiesCP()
@@ -280,5 +286,47 @@ public class BattleManager : MonoBehaviour
     public bool IsVictory()
     {
         return isVictory;
+    }
+
+    void CheckDefeatCondition()
+    {
+        if (isDefeat || isVictory) return;
+
+        if (playerTeam == null || playerTeam.players == null) return;
+
+        bool hasAlivePlayer = false;
+        foreach (var player in playerTeam.players)
+        {
+            if (player != null && player.GetCurrentHP() > 0 && !player.IsDead())
+            {
+                hasAlivePlayer = true;
+                break;
+            }
+        }
+
+        if (!hasAlivePlayer)
+        {
+            TriggerDefeat();
+        }
+    }
+
+    void TriggerDefeat()
+    {
+        isDefeat = true;
+        state = TurnState.BattleEnd;
+
+        Debug.Log("[BattleManager] Tất cả player đã chết! Loading DefeatScene...");
+
+        Invoke("LoadDefeatScene", delayBeforeDefeat);
+    }
+
+    void LoadDefeatScene()
+    {
+        SceneManager.LoadScene(defeatSceneName);
+    }
+
+    public bool IsDefeat()
+    {
+        return isDefeat;
     }
 }
