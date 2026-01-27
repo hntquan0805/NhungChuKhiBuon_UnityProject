@@ -1071,7 +1071,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8204957587288541859, guid: 9268d65fd7869e243a7a1b0edd89c095, type: 3}
       propertyPath: nodeTypes.Array.data[0].sceneName
-      value: BattleScene
+      value: BattleScene01
       objectReference: {fileID: 0}
     - target: {fileID: 8204957587288541859, guid: 9268d65fd7869e243a7a1b0edd89c095, type: 3}
       propertyPath: nodeTypes.Array.data[1].sceneName

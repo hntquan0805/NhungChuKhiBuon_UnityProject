@@ -16,6 +16,11 @@ public class PlayerCharacter : CharacterBase
     [Header("Audio")]
     private AudioSource audioSource;
 
+    // Death system
+    protected bool isDead = false;
+    [Header("Death Effect")]
+    public float fadeOutDuration = 1.5f;
+
     protected override void Awake()
     {
         maxHP = stats.maxHP;
@@ -162,10 +167,19 @@ public class PlayerCharacter : CharacterBase
 
     public override void TakeDamage(int amount)
     {
+        if (isDead) return;
+        
         base.TakeDamage(amount);
         
         // Phát audio hurt
         PlaySound(stats.hurtSound);
+        
+        // Kiểm tra nếu chết
+        if (currentHP <= 0 && !isDead)
+        {
+            isDead = true;
+            StartCoroutine(FadeOutAndDestroy());
+        }
     }
 
     public override void Heal(int amount)
@@ -465,6 +479,50 @@ public class PlayerCharacter : CharacterBase
         {
             audioSource.PlayOneShot(clip);
         }
+    }
+
+    // ========== DEATH SYSTEM ==========
+    
+    private System.Collections.IEnumerator FadeOutAndDestroy()
+    {
+        // Lấy tất cả SpriteRenderer components
+        SpriteRenderer[] spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+        CanvasGroup canvasGroup = GetComponentInChildren<CanvasGroup>();
+        
+        float elapsed = 0f;
+        
+        while (elapsed < fadeOutDuration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = 1f - (elapsed / fadeOutDuration);
+            
+            // Fade out tất cả sprites
+            foreach (var sr in spriteRenderers)
+            {
+                if (sr != null)
+                {
+                    Color color = sr.color;
+                    color.a = alpha;
+                    sr.color = color;
+                }
+            }
+            
+            // Fade out canvas nếu có (healthbar, etc)
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = alpha;
+            }
+            
+            yield return null;
+        }
+        
+        // Sau khi fade out xong, disable GameObject thay vì destroy
+        gameObject.SetActive(false);
+    }
+    
+    public bool IsDead()
+    {
+        return isDead;
     }
 }
 
