@@ -3,15 +3,21 @@ using UnityEngine.SceneManagement;
 
 public class VictoryUIController : MonoBehaviour
 {
-    [Header("Scene Settings")]
-    [SerializeField] private string mapSceneName = "Map";
-
     // Gán hàm này cho Button → OnClick()
     public void OnContinueButton()
     {
         // (Optional) Clear time scale nếu trước đó có pause
         Time.timeScale = 1f;
 
-        SceneManager.LoadScene(mapSceneName);
+        // Quay về MapLv tương ứng
+        if (MapProgressManager.Instance != null && MapProgressManager.Instance.HasActiveMap())
+        {
+            string mapScene = MapProgressManager.Instance.GetCurrentMapScene();
+            SceneManager.LoadScene(mapScene);
+        }
+        else
+        {
+            SceneManager.LoadScene("Map");
+        }
     }
 }

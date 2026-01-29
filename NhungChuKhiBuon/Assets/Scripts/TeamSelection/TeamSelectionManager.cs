@@ -132,6 +132,10 @@ public class TeamSelectionManager : MonoBehaviour
             int selectedLevel = LevelSelector.GetSelectedLevel();
             string targetScene = GetMapSceneByLevel(selectedLevel);
 
+            // ===== ĐÁNH DẤU MAP PROGRESS =====
+            if (MapProgressManager.Instance != null)
+                MapProgressManager.Instance.StartMapProgress(selectedLevel);
+
             // Chuyển scene
             SceneManager.LoadScene(targetScene);
         }
