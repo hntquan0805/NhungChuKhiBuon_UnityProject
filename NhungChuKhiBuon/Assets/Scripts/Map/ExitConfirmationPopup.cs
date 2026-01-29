@@ -21,12 +21,15 @@ public class ExitConfirmationPopup : MonoBehaviour
     [Header("Scene Settings")]
     public string mapChooseSceneName = "MapChoose";
 
-    private void Start()
+    private void Awake()
     {
         // Đảm bảo popup ẩn khi bắt đầu
         if (popupPanel != null)
             popupPanel.SetActive(false);
+    }
 
+    private void Start()
+    {
         // Gán sự kiện cho các nút
         if (pauseButton != null)
             pauseButton.onClick.AddListener(OnPauseClicked);

@@ -313,12 +313,12 @@ GameObject:
   - component: {fileID: 401587162}
   - component: {fileID: 401587161}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: PopupPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &401587160
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2660,5 +2660,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 844441577}
   - {fileID: 375995499}
-  - {fileID: 935821998}
   - {fileID: 250753592}
+  - {fileID: 935821998}
