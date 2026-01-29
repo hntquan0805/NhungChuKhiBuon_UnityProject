@@ -55,7 +55,8 @@ public class ExitConfirmationPopup : MonoBehaviour
         
         if (popupPanel != null)
             popupPanel.SetActive(true);
-        
+        else
+            Debug.Log("[ExitConfirmationPopup] popupPanel chưa được gán trong Inspector!");
         Debug.Log("[ExitConfirmationPopup] Popup hiển thị");
     }
 
