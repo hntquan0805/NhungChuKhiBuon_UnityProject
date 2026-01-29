@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2229938998958507822}
   - component: {fileID: 6974194453106987665}
   - component: {fileID: 6993286426853104551}
+  - component: {fileID: 8232053848225478355}
   m_Layer: 0
   m_Name: Mage
   m_TagString: Untagged
@@ -178,6 +179,7 @@ MonoBehaviour:
     healSound: {fileID: 8300000, guid: fdbb5f6f2a6000843a26bd300416ea8c, type: 3}
     shieldSound: {fileID: 8300000, guid: fdbb5f6f2a6000843a26bd300416ea8c, type: 3}
     castSound: {fileID: 8300000, guid: c0efac7857e9753439c601bf2a7b921b, type: 3}
+  fadeOutDuration: 1.5
 --- !u!82 &6993286426853104551
 AudioSource:
   m_ObjectHideFlags: 0
@@ -275,3 +277,15 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &8232053848225478355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5670378252488612346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31461f7ae1656e84091272c00a8920b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EquipmentStatsApplier
