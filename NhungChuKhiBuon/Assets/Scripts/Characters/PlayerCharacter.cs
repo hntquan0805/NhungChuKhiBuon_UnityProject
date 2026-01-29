@@ -369,6 +369,16 @@ public class PlayerCharacter : CharacterBase
             }
         }
 
+        if (type == DebuffType.Poison)
+        {
+            PoisonEffectController poisonFX = GetComponentInChildren<PoisonEffectController>();
+            if (poisonFX != null)
+            {
+                poisonFX.OnPoisonApplied(stacks);
+            }
+        }
+
+
         UpdateTeamDebuffUI();
     }
 
@@ -401,6 +411,16 @@ public class PlayerCharacter : CharacterBase
     public void RemoveDebuff(DebuffType type)
     {
         debuffs.RemoveAll(d => d.type == type);
+
+        if (type == DebuffType.Poison)
+        {
+            PoisonEffectController poisonFX = GetComponentInChildren<PoisonEffectController>();
+            if (poisonFX != null)
+            {
+                poisonFX.ClearPoison();
+            }
+        }
+
         UpdateTeamDebuffUI();
     }
 
@@ -421,6 +441,15 @@ public class PlayerCharacter : CharacterBase
 
             // Giảm 1 stack
             debuff.ReduceStacks(1);
+
+            if (debuff.type == DebuffType.Poison)
+            {
+                PoisonEffectController poisonFX = GetComponentInChildren<PoisonEffectController>();
+                if (poisonFX != null)
+                {
+                    poisonFX.OnPoisonReduced(1);
+                }
+            }
 
             // Nếu hết stack thì đánh dấu để xóa
             if (debuff.stacks <= 0)

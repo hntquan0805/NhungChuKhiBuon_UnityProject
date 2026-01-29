@@ -2068,6 +2068,8 @@ MonoBehaviour:
   finishTurnButton: {fileID: 1727183485}
   victorySceneName: VictoryScene
   delayBeforeVictory: 3
+  defeatSceneName: DefeatScene
+  delayBeforeDefeat: 1.5
   context:
     playerAP: 0
   state: 0
