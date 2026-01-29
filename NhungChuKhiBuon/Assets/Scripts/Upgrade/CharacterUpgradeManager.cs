@@ -99,7 +99,9 @@ public class CharacterUpgradeManager : MonoBehaviour
                 scale = 700f;
             else if (charName.Contains("cat"))
                 scale = 1200f;
-
+            else if (charName.Contains("assassin") || charName.Contains("warrior"))
+                scale = 800f;
+            
             spawnedCharacter.transform.localScale = Vector3.one * scale;
 
             SpriteRenderer spriteRenderer = spawnedCharacter.GetComponent<SpriteRenderer>();

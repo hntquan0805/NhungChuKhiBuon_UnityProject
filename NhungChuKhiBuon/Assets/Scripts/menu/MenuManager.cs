@@ -28,6 +28,13 @@ public class MenuManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            
+            // Khởi tạo MapProgressManager nếu chưa có
+            if (MapProgressManager.Instance == null)
+            {
+                GameObject mapProgressObj = new GameObject("MapProgressManager");
+                mapProgressObj.AddComponent<MapProgressManager>();
+            }
         }
         else
         {

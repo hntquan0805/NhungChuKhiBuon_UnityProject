@@ -164,6 +164,15 @@ public class CasinoMangaer : MonoBehaviour
 
     void ReturnToMap()
     {
-        MenuManager.Instance.LoadScene("Map");
+        // Quay về MapLv tương ứng
+        if (MapProgressManager.Instance != null && MapProgressManager.Instance.HasActiveMap())
+        {
+            string mapScene = MapProgressManager.Instance.GetCurrentMapScene();
+            MenuManager.Instance.LoadScene(mapScene);
+        }
+        else
+        {
+            MenuManager.Instance.LoadScene("Map");
+        }
     }
 }
