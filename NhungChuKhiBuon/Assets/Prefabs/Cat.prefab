@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3659902222376742771}
   - component: {fileID: 5888463163234955130}
   - component: {fileID: 4496468483751942021}
+  - component: {fileID: 3560845536948677801}
   m_Layer: 0
   m_Name: Cat
   m_TagString: Untagged
@@ -134,6 +135,7 @@ MonoBehaviour:
     healSound: {fileID: 8300000, guid: 4db39dabff8d06b4ca870c046c28c0fd, type: 3}
     shieldSound: {fileID: 8300000, guid: 4db39dabff8d06b4ca870c046c28c0fd, type: 3}
     castSound: {fileID: 8300000, guid: 80a8d9577c2a76b489c30b3895ab607a, type: 3}
+  fadeOutDuration: 1.5
 --- !u!95 &3659902222376742771
 Animator:
   serializedVersion: 7
@@ -275,3 +277,15 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &3560845536948677801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8463999897492138591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31461f7ae1656e84091272c00a8920b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EquipmentStatsApplier
