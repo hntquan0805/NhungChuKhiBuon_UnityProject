@@ -251,17 +251,39 @@ public class VictoryRewardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Quay về Map scene
+    /// Quay về Map scene tương ứng với level đã chọn
     /// </summary>
     void ReturnToMap()
     {
+        int selectedLevel = LevelSelector.GetSelectedLevel();
+        string targetScene = GetMapSceneByLevel(selectedLevel);
+        
         if (MenuManager.Instance != null)
         {
-            MenuManager.Instance.LoadScene("MapChoose");
+            MenuManager.Instance.LoadScene(targetScene);
         }
         else
         {
-            SceneManager.LoadScene("MapChoose");
+            SceneManager.LoadScene(targetScene);
+        }
+    }
+
+    /// <summary>
+    /// Lấy tên scene map theo level
+    /// </summary>
+    private string GetMapSceneByLevel(int level)
+    {
+        switch (level)
+        {
+            case 1:
+                return "MapLv1";
+            case 2:
+                return "MapLv2";
+            case 3:
+                return "MapLv3";
+            default:
+                Debug.LogWarning($"⚠ Level không hợp lệ: {level}. Sử dụng MapLv1 mặc định.");
+                return "MapLv1";
         }
     }
 

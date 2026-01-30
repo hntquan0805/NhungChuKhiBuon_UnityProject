@@ -30,10 +30,9 @@ public class PlayerStats
     {
         get
         {
-            int totalHP, totalATK, totalDEF, specialBonus;
-            levelData.CalculateTotalStatsBonus(out totalHP, out totalATK, out totalDEF, out specialBonus);
-            int bonus = levelData.specialStatType == SpecialStatType.HP ? specialBonus : 0;
-            return baseMaxHP + totalHP + bonus;
+            int totalHP, totalATK, totalDEF;
+            levelData.CalculateTotalStatsBonus(out totalHP, out totalATK, out totalDEF);
+            return baseMaxHP + totalHP;
         }
     }
 
@@ -41,10 +40,9 @@ public class PlayerStats
     {
         get
         {
-            int totalHP, totalATK, totalDEF, specialBonus;
-            levelData.CalculateTotalStatsBonus(out totalHP, out totalATK, out totalDEF, out specialBonus);
-            int bonus = levelData.specialStatType == SpecialStatType.ATK ? specialBonus : 0;
-            return baseAtk + totalATK + bonus;
+            int totalHP, totalATK, totalDEF;
+            levelData.CalculateTotalStatsBonus(out totalHP, out totalATK, out totalDEF);
+            return baseAtk + totalATK;
         }
     }
 
@@ -52,10 +50,9 @@ public class PlayerStats
     {
         get
         {
-            int totalHP, totalATK, totalDEF, specialBonus;
-            levelData.CalculateTotalStatsBonus(out totalHP, out totalATK, out totalDEF, out specialBonus);
-            int bonus = levelData.specialStatType == SpecialStatType.DEF ? specialBonus : 0;
-            return baseDef + totalDEF + bonus;
+            int totalHP, totalATK, totalDEF;
+            levelData.CalculateTotalStatsBonus(out totalHP, out totalATK, out totalDEF);
+            return baseDef + totalDEF;
         }
     }
 
@@ -63,10 +60,7 @@ public class PlayerStats
     {
         get
         {
-            int totalHP, totalATK, totalDEF, specialBonus;
-            levelData.CalculateTotalStatsBonus(out totalHP, out totalATK, out totalDEF, out specialBonus);
-            int bonus = levelData.specialStatType == SpecialStatType.Crit ? specialBonus : 0;
-            return baseCrit + bonus;
+            return baseCrit;
         }
     }
 
@@ -74,10 +68,7 @@ public class PlayerStats
     {
         get
         {
-            int totalHP, totalATK, totalDEF, specialBonus;
-            levelData.CalculateTotalStatsBonus(out totalHP, out totalATK, out totalDEF, out specialBonus);
-            int bonus = levelData.specialStatType == SpecialStatType.CritDam ? specialBonus : 0;
-            return baseCritDam + bonus;
+            return baseCritDam;
         }
     }
 
@@ -130,8 +121,6 @@ public class PlayerStats
         this.levelData.hpPerLevel = other.levelData.hpPerLevel;
         this.levelData.atkPerLevel = other.levelData.atkPerLevel;
         this.levelData.defPerLevel = other.levelData.defPerLevel;
-        this.levelData.specialStatType = other.levelData.specialStatType;
-        this.levelData.specialStatBonus = other.levelData.specialStatBonus;
         this.levelData.baseExpCost = other.levelData.baseExpCost;
         this.levelData.baseGoldCost = other.levelData.baseGoldCost;
         this.levelData.costMultiplierPerLevel = other.levelData.costMultiplierPerLevel;
