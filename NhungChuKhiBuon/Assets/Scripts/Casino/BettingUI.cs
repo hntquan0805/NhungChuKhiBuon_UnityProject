@@ -7,27 +7,24 @@ public class BettingUI : MonoBehaviour
     [Header("UI Elements")]
     public TextMeshProUGUI questionText;
     public TextMeshProUGUI coinDisplayText;
-    public Button bet1000Button;
-    public Button bet2000Button;
-    public Button bet5000Button;
-    public Button betAllButton;
+    public Button bet25Button;
+    public Button bet50Button;
+    public Button bet75Button;
+    public Button bet100Button;
 
     void Start()
     {
         questionText.text = "Hãy chọn mức cược!";
         UpdateCoinDisplay();
 
-        // Gán sự kiện cho các nút
-        bet1000Button.onClick.AddListener(() => SelectBet(1000));
-        bet2000Button.onClick.AddListener(() => SelectBet(2000));
-        bet5000Button.onClick.AddListener(() => SelectBet(5000));
-        betAllButton.onClick.AddListener(() => SelectBet(MenuManager.Instance.PlayerCoins));
+        // Gán sự kiện cho các nút với phần trăm
+        bet25Button.onClick.AddListener(() => SelectBetPercentage(0.25f));
+        bet50Button.onClick.AddListener(() => SelectBetPercentage(0.5f));
+        bet75Button.onClick.AddListener(() => SelectBetPercentage(0.75f));
+        bet100Button.onClick.AddListener(() => SelectBetPercentage(1.0f));
 
-        // Đặt text cho các nút
-        bet1000Button.GetComponentInChildren<TextMeshProUGUI>().text = "1000";
-        bet2000Button.GetComponentInChildren<TextMeshProUGUI>().text = "2000";
-        bet5000Button.GetComponentInChildren<TextMeshProUGUI>().text = "5000";
-        betAllButton.GetComponentInChildren<TextMeshProUGUI>().text = "Cược Hết";
+        // Cập nhật text cho các nút
+        UpdateButtonTexts();
     }
 
     void UpdateCoinDisplay()
@@ -35,7 +32,17 @@ public class BettingUI : MonoBehaviour
         coinDisplayText.text = $"{MenuManager.Instance.PlayerCoins}";
     }
 
-    void SelectBet(int amount)
+    void UpdateButtonTexts()
+    {
+        int totalCoins = MenuManager.Instance.PlayerCoins;
+
+        bet25Button.GetComponentInChildren<TextMeshProUGUI>().text = $"25%\n({Mathf.FloorToInt(totalCoins * 0.25f)})";
+        bet50Button.GetComponentInChildren<TextMeshProUGUI>().text = $"50%\n({Mathf.FloorToInt(totalCoins * 0.5f)})";
+        bet75Button.GetComponentInChildren<TextMeshProUGUI>().text = $"75%\n({Mathf.FloorToInt(totalCoins * 0.75f)})";
+        bet100Button.GetComponentInChildren<TextMeshProUGUI>().text = $"100%\n({totalCoins})";
+    }
+
+    void SelectBetPercentage(float percentage)
     {
         // Phát âm thanh khi bấm nút
         if (AudioCasinoManager.Instance != null)
@@ -43,10 +50,14 @@ public class BettingUI : MonoBehaviour
             AudioCasinoManager.Instance.PlayButtonClick();
         }
 
-        if (amount <= MenuManager.Instance.PlayerCoins)
+        int totalCoins = MenuManager.Instance.PlayerCoins;
+        int betAmount = Mathf.FloorToInt(totalCoins * percentage);
+
+        // Kiểm tra nếu người chơi có đủ coin
+        if (betAmount > 0 && betAmount <= totalCoins)
         {
-            MenuManager.Instance.CurrentBet = amount;
-            MenuManager.Instance.SpendCoins(amount);
+            MenuManager.Instance.CurrentBet = betAmount;
+            MenuManager.Instance.SpendCoins(betAmount);
             MenuManager.Instance.LoadScene("Casino");
         }
         else

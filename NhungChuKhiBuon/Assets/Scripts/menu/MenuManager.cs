@@ -6,7 +6,7 @@ public class MenuManager : MonoBehaviour
     public static MenuManager Instance { get; private set; }
 
     [Header("Player Resources")]
-    public int PlayerCoins { get; private set; } = 10000;
+    public int PlayerCoins { get; private set; } = 0;
     public int CurrentBet { get; set; }
 
     // Events
@@ -28,7 +28,7 @@ public class MenuManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            
+
             // Khởi tạo MapProgressManager nếu chưa có
             if (MapProgressManager.Instance == null)
             {
@@ -63,7 +63,7 @@ public class MenuManager : MonoBehaviour
     public void LoadScene(string sceneName)
     {
         if (!SceneExists(sceneName)) return;
-        
+
         SceneManager.LoadScene(sceneName);
     }
 
@@ -100,16 +100,50 @@ public class MenuManager : MonoBehaviour
         return currentScene == BATTLE_SCENE || currentScene == ARENA_SCENE;
     }
 
-    public void ResetGameData()
+    /// <summary>
+    /// ✅ Reset coins về 0
+    /// Dùng khi: Bắt đầu map mới hoặc thoát map
+    /// </summary>
+    public void ResetCoins()
     {
-        PlayerCoins = 10000;
+        PlayerCoins = 0;
         CurrentBet = 0;
         OnCoinsChanged?.Invoke(PlayerCoins);
+        Debug.Log("[MenuManager] Reset coins về 0");
+    }
 
+    /// <summary>
+    /// ✅ Clear team data
+    /// Dùng khi: Thoát map hoặc cần reset team
+    /// </summary>
+    public void ClearTeamData()
+    {
         if (PersistentTeamManager.Instance != null)
         {
             PersistentTeamManager.Instance.ClearTeamData();
+            Debug.Log("[MenuManager] Clear team data");
         }
+    }
+
+    /// <summary>
+    /// ✅ Reset toàn bộ (coins + team)
+    /// Dùng khi: Reset game hoàn toàn
+    /// </summary>
+    public void ResetAll()
+    {
+        ResetCoins();
+        ClearTeamData();
+        Debug.Log("[MenuManager] Reset ALL (coins + team)");
+    }
+
+    /// <summary>
+    /// [DEPRECATED] Giữ lại để tương thích code cũ
+    /// Chỉ reset coins, KHÔNG clear team
+    /// </summary>
+    public void ResetGameData()
+    {
+        ResetCoins();
+        Debug.Log("[MenuManager] ResetGameData called (chỉ reset coins)");
     }
 
     // Debug: Log game state

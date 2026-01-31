@@ -32,7 +32,14 @@ public class MapProgressManager : MonoBehaviour
         PlayerPrefs.SetInt(CURRENT_MAP_KEY, mapLevel);
         PlayerPrefs.SetInt(HAS_ACTIVE_MAP_KEY, 1);
         PlayerPrefs.Save();
-        
+
+        // ✅ Chỉ reset coins, KHÔNG clear team data
+        if (MenuManager.Instance != null)
+        {
+            MenuManager.Instance.ResetCoins();
+            Debug.Log("[MapProgressManager] ✓ Đã reset coin về 0 khi bắt đầu map (giữ nguyên team)");
+        }
+
         Debug.Log($"[MapProgressManager] Đã bắt đầu map Level {mapLevel}");
     }
 
@@ -60,10 +67,18 @@ public class MapProgressManager : MonoBehaviour
         PlayerPrefs.DeleteKey(CURRENT_MAP_KEY);
         PlayerPrefs.DeleteKey(HAS_ACTIVE_MAP_KEY);
         PlayerPrefs.Save();
-        
+
         // Xóa luôn dữ liệu map đã generate
         MapGenerator.savedMapData = null;
-        
+
+        // ✅ Reset coins VÀ clear team khi thoát map
+        if (MenuManager.Instance != null)
+        {
+            MenuManager.Instance.ResetCoins();
+            MenuManager.Instance.ClearTeamData();
+            Debug.Log("[MapProgressManager] ✓ Đã reset coin và clear team khi thoát map");
+        }
+
         Debug.Log("[MapProgressManager] ✓ Đã xóa tiến trình map");
     }
 
@@ -91,7 +106,7 @@ public class MapProgressManager : MonoBehaviour
     public string GetCurrentMapScene()
     {
         int level = GetCurrentMapLevel();
-        
+
         switch (level)
         {
             case 1:

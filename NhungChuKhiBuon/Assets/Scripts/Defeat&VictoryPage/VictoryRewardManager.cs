@@ -16,6 +16,9 @@ public class VictoryRewardManager : MonoBehaviour
     [Tooltip("Số EXP nhận được sau khi thắng")]
     public int expReward = 300;
 
+    [Tooltip("Số coin nhận được sau khi thắng (dùng trong map)")]
+    public int coinReward = 100;
+
     [Header("Level-based Multiplier")]
     [Tooltip("Nhân thưởng theo level đã chọn")]
     public bool useMultiplier = true;
@@ -32,8 +35,13 @@ public class VictoryRewardManager : MonoBehaviour
     public Image expRewardIcon;
     public TextMeshProUGUI expRewardText;
 
+    [Tooltip("Icon hiển thị cho Coin reward")]
+    public Image coinRewardIcon;
+    public TextMeshProUGUI coinRewardText;
+
     public TextMeshProUGUI totalGoldText;
     public TextMeshProUGUI totalExpText;
+    public TextMeshProUGUI totalCoinText;
     public Button continueButton;
 
     [Header("Animation Settings")]
@@ -46,6 +54,7 @@ public class VictoryRewardManager : MonoBehaviour
 
     private int finalGoldReward;
     private int finalExpReward;
+    private int finalCoinReward;
     private bool rewardsGranted = false;
 
     void Start()
@@ -74,6 +83,7 @@ public class VictoryRewardManager : MonoBehaviour
     {
         finalGoldReward = goldReward;
         finalExpReward = expReward;
+        finalCoinReward = coinReward;
 
         if (useMultiplier)
         {
@@ -95,11 +105,12 @@ public class VictoryRewardManager : MonoBehaviour
 
             finalGoldReward = Mathf.RoundToInt(goldReward * multiplier);
             finalExpReward = Mathf.RoundToInt(expReward * multiplier);
+            finalCoinReward = Mathf.RoundToInt(coinReward * multiplier);
 
             Debug.Log($"[VictoryReward] Level {selectedLevel} - Multiplier: {multiplier}x");
         }
 
-        Debug.Log($"[VictoryReward] Gold: {finalGoldReward}, EXP: {finalExpReward}");
+        Debug.Log($"[VictoryReward] Gold: {finalGoldReward}, EXP: {finalExpReward}, Coin: {finalCoinReward}");
     }
 
     /// <summary>
@@ -113,12 +124,18 @@ public class VictoryRewardManager : MonoBehaviour
         PlayerResourceManager.Instance.AddGold(finalGoldReward);
         PlayerResourceManager.Instance.AddExp(finalExpReward);
 
+        // Cộng coin vào MenuManager (coin dùng trong map)
+        if (MenuManager.Instance != null)
+        {
+            MenuManager.Instance.AddCoins(finalCoinReward);
+        }
+
         // Update UI
         UpdateRewardUI();
         UpdateTotalUI();
 
         rewardsGranted = true;
-        Debug.Log($"[VictoryReward] ✓ Đã cộng {finalGoldReward} Gold và {finalExpReward} EXP");
+        Debug.Log($"[VictoryReward] ✓ Đã cộng {finalGoldReward} Gold, {finalExpReward} EXP, và {finalCoinReward} Coin");
     }
 
     /// <summary>
@@ -131,13 +148,16 @@ public class VictoryRewardManager : MonoBehaviour
         float elapsed = 0f;
         int currentGold = 0;
         int currentExp = 0;
+        int currentCoin = 0;
 
         int startGold = PlayerResourceManager.Instance.CurrentGold;
         int startExp = PlayerResourceManager.Instance.CurrentExp;
+        int startCoin = MenuManager.Instance != null ? MenuManager.Instance.PlayerCoins : 0;
 
         // Icon animation setup
         Vector3 goldIconOriginalScale = Vector3.one;
         Vector3 expIconOriginalScale = Vector3.one;
+        Vector3 coinIconOriginalScale = Vector3.one;
 
         if (animateIcons)
         {
@@ -145,6 +165,8 @@ public class VictoryRewardManager : MonoBehaviour
                 goldIconOriginalScale = goldRewardIcon.transform.localScale;
             if (expRewardIcon != null)
                 expIconOriginalScale = expRewardIcon.transform.localScale;
+            if (coinRewardIcon != null)
+                coinIconOriginalScale = coinRewardIcon.transform.localScale;
         }
 
         while (elapsed < animationDuration)
@@ -155,6 +177,7 @@ public class VictoryRewardManager : MonoBehaviour
             // Animate counting up
             currentGold = Mathf.RoundToInt(Mathf.Lerp(0, finalGoldReward, progress));
             currentExp = Mathf.RoundToInt(Mathf.Lerp(0, finalExpReward, progress));
+            currentCoin = Mathf.RoundToInt(Mathf.Lerp(0, finalCoinReward, progress));
 
             // Update reward display
             if (goldRewardText != null)
@@ -163,12 +186,18 @@ public class VictoryRewardManager : MonoBehaviour
             if (expRewardText != null)
                 expRewardText.text = $"+{currentExp}";
 
+            if (coinRewardText != null)
+                coinRewardText.text = $"+{currentCoin}";
+
             // Update total display
             if (totalGoldText != null)
                 totalGoldText.text = $"{startGold + currentGold}";
 
             if (totalExpText != null)
                 totalExpText.text = $"{startExp + currentExp}";
+
+            if (totalCoinText != null)
+                totalCoinText.text = $"{startCoin + currentCoin}";
 
             // Animate icons (pulse effect)
             if (animateIcons)
@@ -181,6 +210,9 @@ public class VictoryRewardManager : MonoBehaviour
 
                 if (expRewardIcon != null)
                     expRewardIcon.transform.localScale = expIconOriginalScale * currentScale;
+
+                if (coinRewardIcon != null)
+                    coinRewardIcon.transform.localScale = coinIconOriginalScale * currentScale;
             }
 
             yield return null;
@@ -193,22 +225,31 @@ public class VictoryRewardManager : MonoBehaviour
                 goldRewardIcon.transform.localScale = goldIconOriginalScale;
             if (expRewardIcon != null)
                 expRewardIcon.transform.localScale = expIconOriginalScale;
+            if (coinRewardIcon != null)
+                coinRewardIcon.transform.localScale = coinIconOriginalScale;
         }
 
         // Ensure final values
         currentGold = finalGoldReward;
         currentExp = finalExpReward;
+        currentCoin = finalCoinReward;
 
         // Grant actual rewards
         PlayerResourceManager.Instance.AddGold(finalGoldReward);
         PlayerResourceManager.Instance.AddExp(finalExpReward);
+
+        // Cộng coin vào MenuManager
+        if (MenuManager.Instance != null)
+        {
+            MenuManager.Instance.AddCoins(finalCoinReward);
+        }
 
         // Final UI update
         UpdateRewardUI();
         UpdateTotalUI();
 
         rewardsGranted = true;
-        Debug.Log($"[VictoryReward] ✓ Animation complete. Granted {finalGoldReward} Gold và {finalExpReward} EXP");
+        Debug.Log($"[VictoryReward] ✓ Animation complete. Granted {finalGoldReward} Gold, {finalExpReward} EXP, và {finalCoinReward} Coin");
     }
 
     /// <summary>
@@ -221,6 +262,9 @@ public class VictoryRewardManager : MonoBehaviour
 
         if (expRewardText != null)
             expRewardText.text = $"{finalExpReward}";
+
+        if (coinRewardText != null)
+            coinRewardText.text = $"{finalCoinReward}";
     }
 
     /// <summary>
@@ -233,6 +277,9 @@ public class VictoryRewardManager : MonoBehaviour
 
         if (totalExpText != null)
             totalExpText.text = $"{PlayerResourceManager.Instance.CurrentExp}";
+
+        if (totalCoinText != null && MenuManager.Instance != null)
+            totalCoinText.text = $"{MenuManager.Instance.PlayerCoins}";
     }
 
     /// <summary>
@@ -257,7 +304,7 @@ public class VictoryRewardManager : MonoBehaviour
     {
         int selectedLevel = LevelSelector.GetSelectedLevel();
         string targetScene = GetMapSceneByLevel(selectedLevel);
-        
+
         if (MenuManager.Instance != null)
         {
             MenuManager.Instance.LoadScene(targetScene);
