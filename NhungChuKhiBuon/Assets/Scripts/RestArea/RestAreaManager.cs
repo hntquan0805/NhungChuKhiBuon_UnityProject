@@ -134,7 +134,16 @@ public class RestAreaManager : MonoBehaviour
             shopManager.ResetShop();
         }
 
-        SceneManager.LoadScene("Map");
+        // Quay về MapLv tương ứng
+        if (MapProgressManager.Instance != null && MapProgressManager.Instance.HasActiveMap())
+        {
+            string mapScene = MapProgressManager.Instance.GetCurrentMapScene();
+            SceneManager.LoadScene(mapScene);
+        }
+        else
+        {
+            SceneManager.LoadScene("Map");
+        }
     }
 
     private void OnEnable()

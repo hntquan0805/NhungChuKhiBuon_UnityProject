@@ -142,6 +142,11 @@ public class TargetSelector : MonoBehaviour
                     {
                         offset.y += 1f;
                     }
+                    // Nếu là FlatEnemy thì tăng Y thêm 0.5
+                    else if (currentSelectedEnemy is FlatEnemy)
+                    {
+                        offset.y += 0.5f;
+                    }
                     
                     targetingIndicator.transform.position = currentSelectedEnemy.transform.position + offset;
                 }
@@ -183,6 +188,11 @@ public class TargetSelector : MonoBehaviour
             if (currentSelectedEnemy is BossEnemy)
             {
                 offset.y += 1.25f;
+            }
+            // Nếu là FlatEnemy thì tăng Y thêm 0.5
+            else if (currentSelectedEnemy is FlatEnemy)
+            {
+                offset.y += 0.5f;
             }
             
             targetingIndicator.transform.position = currentSelectedEnemy.transform.position + offset;

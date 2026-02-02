@@ -4,21 +4,29 @@ public enum CharacterClass
 {
     Mage,
     Knight,
-    Priest
+    Priest,
+    Warrior,
+    Assassin
 }
 
 public static class ClassAdvantage
 {
-    // Mage > Knight > Priest > Mage
+    // Priest > Knight > Mage > Warrior > Assassin > Priest
     public static float GetDamageMultiplier(CharacterClass attacker, CharacterClass defender)
     {
-        if (attacker == CharacterClass.Mage && defender == CharacterClass.Knight)
+        if (attacker == CharacterClass.Priest && defender == CharacterClass.Knight)
             return 1.3f; // +30% damage
 
-        if (attacker == CharacterClass.Knight && defender == CharacterClass.Priest)
+        if (attacker == CharacterClass.Knight && defender == CharacterClass.Mage)
             return 1.3f;
 
-        if (attacker == CharacterClass.Priest && defender == CharacterClass.Mage)
+        if (attacker == CharacterClass.Mage && defender == CharacterClass.Warrior)
+            return 1.3f;
+
+        if (attacker == CharacterClass.Warrior && defender == CharacterClass.Assassin)
+            return 1.3f;
+
+        if (attacker == CharacterClass.Assassin && defender == CharacterClass.Priest)
             return 1.3f;
 
         return 1.0f; // Normal damage
@@ -35,6 +43,10 @@ public static class ClassAdvantage
                 return "Knight";
             case CharacterClass.Priest:
                 return "Priest";
+            case CharacterClass.Warrior:
+                return "Warrior";
+            case CharacterClass.Assassin:
+                return "Assassin";
             default:
                 return "Unknown";
         }
@@ -51,6 +63,10 @@ public static class ClassAdvantage
                 return new Color(1f, 0.8f, 0.2f); // Gold
             case CharacterClass.Priest:
                 return new Color(1f, 1f, 0.9f); // White/Cream
+            case CharacterClass.Warrior:
+                return new Color(0.8f, 0.2f, 0.2f); // Red
+            case CharacterClass.Assassin:
+                return new Color(0.5f, 0.2f, 0.6f); // Purple
             default:
                 return Color.white;
         }

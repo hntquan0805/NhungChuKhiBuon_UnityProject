@@ -128,12 +128,36 @@ public class TeamSelectionManager : MonoBehaviour
             // ===== NEW: Khởi tạo PersistentTeamManager =====
             InitializePersistentTeam();
 
+            // Lấy level đã chọn và chuyển đến map tương ứng
+            int selectedLevel = LevelSelector.GetSelectedLevel();
+            string targetScene = GetMapSceneByLevel(selectedLevel);
+
+            // ===== ĐÁNH DẤU MAP PROGRESS =====
+            if (MapProgressManager.Instance != null)
+                MapProgressManager.Instance.StartMapProgress(selectedLevel);
+
             // Chuyển scene
-            SceneManager.LoadScene(nextSceneName);
+            SceneManager.LoadScene(targetScene);
         }
         else
         {
             Debug.LogWarning($"⚠ Chưa đủ heroes! Cần {maxTeamSize}, đang chọn: {selectedHeroes.Count}");
+        }
+    }
+
+    private string GetMapSceneByLevel(int level)
+    {
+        switch (level)
+        {
+            case 1:
+                return "MapLv1";
+            case 2:
+                return "MapLv2";
+            case 3:
+                return "MapLv3";
+            default:
+                Debug.LogWarning($"⚠ Level không hợp lệ: {level}. Sử dụng MapLv1 mặc định.");
+                return "MapLv1";
         }
     }
 
