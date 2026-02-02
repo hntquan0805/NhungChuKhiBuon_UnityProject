@@ -43,6 +43,13 @@ public class MapGenerator : MonoBehaviour
 
     public static List<List<MapNodeData>> savedMapData;
 
+    [Header("Boss Config")]
+    // Kéo 3 file BossData vào list này theo thứ tự
+    public List<BossData> levelBossList;
+
+    // Biến lưu level hiện tại (0, 1, 2...)
+    public int currentLevelIndex = 0;
+
     void Start()
     {
         if (savedMapData == null || savedMapData.Count == 0)
@@ -162,6 +169,8 @@ public class MapGenerator : MonoBehaviour
                     }
                 }
             }
+
+
         }
     }
 
@@ -178,7 +187,7 @@ public class MapGenerator : MonoBehaviour
 
     void SpawnMapVisuals()
     {
-        foreach (Transform child in mapContainer) Destroy(child.gameObject);
+        foreach (Transform child in mapContainer) ;
 
         RectTransform containerRect = mapContainer.GetComponent<RectTransform>();
 
@@ -240,6 +249,57 @@ public class MapGenerator : MonoBehaviour
         Canvas.ForceUpdateCanvases();
         ScrollRect scrollRect = mapContainer.GetComponentInParent<ScrollRect>();
         if (scrollRect != null) scrollRect.horizontalNormalizedPosition = 0f;
+
+        if (MapPlayerController.Instance != null)
+        {
+            // 1. Đưa Hero xuống dưới cùng để nổi lên trên (Sửa lỗi hiển thị bị chìm)
+            MapPlayerController.Instance.transform.SetAsLastSibling();
+
+            MapNode lastCompletedNode = null;
+
+            // 2. Tìm node cuối cùng đã hoàn thành (để Resume game)
+            // Duyệt ngược từ map cuối về đầu
+            for (int i = savedMapData.Count - 1; i >= 0; i--)
+            {
+                bool found = false;
+                for (int j = 0; j < savedMapData[i].Count; j++)
+                {
+                    if (savedMapData[i][j].state == NodeState.Completed)
+                    {
+                        lastCompletedNode = nodeLookup[i, j];
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) break;
+            }
+
+            // --- LOGIC MỚI Ở ĐÂY ---
+
+            if (lastCompletedNode != null)
+            {
+                // TRƯỜNG HỢP 1: ĐANG CHƠI DỞ (Resume)
+                // Node có Transform nên dùng SnapToPosition (World Position) là đúng
+                MapPlayerController.Instance.SnapToPosition(lastCompletedNode.transform.position);
+            }
+            else
+            {
+                // TRƯỜNG HỢP 2: NEW GAME (Chưa đi ải nào)
+
+                float startPlayerMapX = 200f;
+                float waitingX = startPlayerMapX - 150f; // Đứng lùi lại 150 đơn vị
+
+                // Tính tọa độ Cục bộ (Local)
+                Vector3 waitingLocalPos = new Vector3(waitingX, 0, 0);
+
+                // --- SỬA Ở ĐÂY: Gán thẳng vào localPosition ---
+                // Thay vì gọi SnapToPosition, ta set localPosition để nó hiểu là tọa độ trong MapContainer
+                MapPlayerController.Instance.transform.localPosition = waitingLocalPos;
+
+                // Reset Z về 0 cho chắc chắn
+                MapPlayerController.Instance.transform.localPosition = new Vector3(waitingX, 0, 0);
+            }
+        }
     }
 
     void CreateLine(RectTransform A, RectTransform B)
