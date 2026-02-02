@@ -31,7 +31,7 @@ public class EnemyCharacter : CharacterBase
 
     private int currentCP;
     protected PlayerTeam targetTeam; // Đổi từ PlayerCharacter → PlayerTeam (protected để subclass truy cập)
-    private bool isDead = false;
+    protected bool isDead = false;
     private int turnCounter = 0;
     
     // Debuff system

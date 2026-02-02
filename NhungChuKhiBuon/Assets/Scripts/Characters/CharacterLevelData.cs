@@ -13,11 +13,6 @@ public class CharacterLevelData
     public int atkPerLevel = 3;
     public int defPerLevel = 1;
 
-    [Header("Special Bonus Every 10 Levels")]
-    public SpecialStatType specialStatType = SpecialStatType.Crit;
-    [Range(1, 50)]
-    public int specialStatBonus = 5;
-
     [Header("Level Up Cost")]
     public int baseExpCost = 100;
     public int baseGoldCost = 50;
@@ -38,32 +33,11 @@ public class CharacterLevelData
         return currentLevel < MAX_LEVEL;
     }
 
-    public bool IsSpecialLevel(int level)
-    {
-        return level > MIN_LEVEL && level % 10 == 0;
-    }
-
-    public void CalculateTotalStatsBonus(out int totalHP, out int totalATK, out int totalDEF, out int specialBonus)
+    public void CalculateTotalStatsBonus(out int totalHP, out int totalATK, out int totalDEF)
     {
         int levelsGained = currentLevel - MIN_LEVEL;
         totalHP = levelsGained * hpPerLevel;
         totalATK = levelsGained * atkPerLevel;
         totalDEF = levelsGained * defPerLevel;
-
-        int specialLevelCount = 0;
-        for (int level = MIN_LEVEL + 10; level <= currentLevel; level += 10)
-        {
-            specialLevelCount++;
-        }
-        specialBonus = specialLevelCount * specialStatBonus;
     }
-}
-
-public enum SpecialStatType
-{
-    HP,
-    ATK,
-    DEF,
-    Crit,
-    CritDam
 }

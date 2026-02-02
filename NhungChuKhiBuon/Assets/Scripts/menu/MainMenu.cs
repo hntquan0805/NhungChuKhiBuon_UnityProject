@@ -27,7 +27,7 @@ public class MainMenu : MonoBehaviour
 
     void EnterMap()
     {
-        MenuManager.Instance.LoadScene("TeamSelection");
+        MenuManager.Instance.LoadScene("MapChoose");
     }
     void EnterCasino()
     {

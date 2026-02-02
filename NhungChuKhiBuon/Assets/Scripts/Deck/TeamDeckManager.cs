@@ -115,6 +115,17 @@ public class TeamDeckManager : MonoBehaviour
 
             // Rút lá đầu tiên
             CardData card = drawPile[0];
+            
+            // Kiểm tra xem owner của card còn sống không
+            PlayerCharacter owner = GetOwnerOfCard(card);
+            if (owner != null && owner.IsDead())
+            {
+                // Nếu owner đã chết, loại bỏ card khỏi drawPile và không rút
+                drawPile.RemoveAt(0);
+                i--; // Giảm i để rút lại lá khác
+                continue;
+            }
+            
             drawPile.RemoveAt(0);
             drawnCards.Add(card);
         }

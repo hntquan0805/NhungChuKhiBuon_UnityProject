@@ -64,7 +64,7 @@ public class CasinoMangaer : MonoBehaviour
     void UpdateUI()
     {
         betAmountText.text = $"Cược: {MenuManager.Instance.CurrentBet}";
-        coinText.text = $"Coin: {MenuManager.Instance.PlayerCoins}";
+        coinText.text = $"{MenuManager.Instance.PlayerCoins}";
     }
 
     // Được gọi từ CasinoCards.OnMouseDown()
@@ -164,6 +164,15 @@ public class CasinoMangaer : MonoBehaviour
 
     void ReturnToMap()
     {
-        MenuManager.Instance.LoadScene("Map");
+        // Quay về MapLv tương ứng
+        if (MapProgressManager.Instance != null && MapProgressManager.Instance.HasActiveMap())
+        {
+            string mapScene = MapProgressManager.Instance.GetCurrentMapScene();
+            MenuManager.Instance.LoadScene(mapScene);
+        }
+        else
+        {
+            MenuManager.Instance.LoadScene("Map");
+        }
     }
 }
