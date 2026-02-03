@@ -177,9 +177,9 @@ MonoBehaviour:
   maxHP: 3549
   animator: {fileID: 7432436520470736307}
   stats:
-    maxHP: 3549
-    atk: 1
-    def: 500
+    maxHP: 8549
+    atk: 500
+    def: 100
     crit: 100
     critDam: 150
     attackPercent: 100
