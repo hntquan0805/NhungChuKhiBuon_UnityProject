@@ -19,6 +19,9 @@ public class ShopManager : MonoBehaviour
     [Header("Item Slots")]
     public List<ShopItemSlot> itemSlots;
 
+    [Header("Shop Cost")]
+    public int refreshCost = 50;
+
     private bool shopGenerated = false;
 
     public static ShopManager Instance { get; private set; }
@@ -68,7 +71,21 @@ public class ShopManager : MonoBehaviour
 
     void RefreshShop()
     {
-        // Phát âm thanh refresh
+        int playerCoins = MenuManager.Instance.PlayerCoins;
+
+        bool success = MenuManager.Instance.SpendCoins(refreshCost);
+
+        if (!success) {
+            Debug.Log("Not enough coins");
+
+            // Phát âm thanh không đủ tiền
+            if (AudioRestAreaManager.Instance != null)
+            {
+                AudioRestAreaManager.Instance.PlayError();
+            }
+            return;
+        }
+
         if (AudioRestAreaManager.Instance != null)
         {
             AudioRestAreaManager.Instance.PlayButtonClick();

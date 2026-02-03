@@ -55,12 +55,49 @@ public class MapNode : MonoBehaviour
 
     public void OnClickNode()
     {
+        Debug.Log($"MapNode: Đã click vào Node tại [{gridX}, {gridY}]");
+
         MapGenerator.OnNodeSelected(gridX, gridY);
 
+        // --- SỬA ĐOẠN NÀY ---
+        // Nếu Instance bị null, thử tìm lại một lần nữa cho chắc
+        if (MapPlayerController.Instance == null)
+        {
+            MapPlayerController.Instance = FindFirstObjectByType<MapPlayerController>(); // Hoặc FindFirstObjectByType trong Unity mới
+        }
+
+        if (MapPlayerController.Instance != null)
+        {
+            button.interactable = false;
+            Debug.Log("MapNode: Đang gọi MapPlayer di chuyển...");
+            MapPlayerController.Instance.MoveToNode(this.transform.position, () =>
+            {
+                Debug.Log("MapNode: Callback nhận được -> Chuyển cảnh ngay.");
+                EnterScene();
+            });
+        }
+        else
+        {
+            // Nếu tìm mọi cách vẫn không thấy thì đành chịu
+            Debug.LogError("LỖI: Vẫn không tìm thấy MapPlayerController! Hãy kiểm tra xem GameObject MapPlayer có bật không?");
+            EnterScene();
+        }
+    }
+
+    // Tách hàm load scene ra riêng cho gọn
+    void EnterScene()
+    {
         if (!string.IsNullOrEmpty(sceneToLoad))
         {
             if (MenuManager.Instance != null)
+            {
                 MenuManager.Instance.LoadScene(sceneToLoad);
+            }
+            else
+            {
+                // Dự phòng
+                UnityEngine.SceneManagement.SceneManager.LoadScene(sceneToLoad);
+            }
         }
     }
 }
