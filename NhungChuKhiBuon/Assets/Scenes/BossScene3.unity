@@ -2122,8 +2122,10 @@ MonoBehaviour:
   enemyCPMax: 5
   handController: {fileID: 1399963087}
   finishTurnButton: {fileID: 1727183485}
-  victorySceneName: VictoryScene
+  victorySceneName: BossVictoryScene
   delayBeforeVictory: 3
+  defeatSceneName: DefeatScene
+  delayBeforeDefeat: 1.5
   context:
     playerAP: 0
   state: 0
