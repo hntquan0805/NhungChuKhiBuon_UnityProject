@@ -54,6 +54,7 @@ public class CardActionQueue : MonoBehaviour
             List<EnemyCharacter> enemiesToInterrupt = new List<EnemyCharacter>();
             foreach (var enemy in BattleManager.Instance.enemies)
             {
+                // Kiểm tra enemy không null và chưa bị destroy
                 if (enemy != null && enemy.HasCPRemaining())
                 {
                     enemy.ReduceCP(1);
@@ -102,8 +103,10 @@ public class CardActionQueue : MonoBehaviour
     {
         BattleManager.Instance.state = TurnState.EnemyInterrupt;
 
-        if (BattleManager.Instance.playerTeam == null)
+        // Kiểm tra enemy có null hoặc đã bị destroy chưa
+        if (enemy == null || BattleManager.Instance.playerTeam == null)
         {
+            BattleManager.Instance.state = TurnState.PlayerTurn;
             yield break;
         }
 
@@ -112,6 +115,13 @@ public class CardActionQueue : MonoBehaviour
 
         // Đợi animation attack
         yield return new WaitForSeconds(1.0f);
+
+        // Kiểm tra lại enemy vẫn còn tồn tại trước khi deal damage
+        if (enemy == null)
+        {
+            BattleManager.Instance.state = TurnState.PlayerTurn;
+            yield break;
+        }
 
         // Deal damage
         Debug.Log($"[CardActionQueue] Calling DealDamage() on {enemy.name}");
