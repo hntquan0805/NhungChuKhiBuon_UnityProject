@@ -54,7 +54,7 @@ public class BettingUI : MonoBehaviour
         int betAmount = Mathf.FloorToInt(totalCoins * percentage);
 
         // Kiểm tra nếu người chơi có đủ coin
-        if (betAmount > 0 && betAmount <= totalCoins)
+        if (betAmount >= 0 && betAmount <= totalCoins)
         {
             MenuManager.Instance.CurrentBet = betAmount;
             MenuManager.Instance.SpendCoins(betAmount);
